@@ -252,37 +252,36 @@ function SpectrumX:CreateRipple(parent, position)
     local ripple = Instance.new("Frame")
     ripple.Name = "Ripple"
     ripple.BackgroundColor3 = Color3.new(1, 1, 1)
-    ripple.BackgroundTransparency = 0.85
+    ripple.BackgroundTransparency = 0.8
     ripple.BorderSizePixel = 0
     ripple.ZIndex = parent.ZIndex + 10
     
-    local maxSize = math.max(parent.AbsoluteSize.X, parent.AbsoluteSize.Y) * 1.5
+    -- Ripple menor (1.2x em vez de 1.5x)
+    local maxSize = math.max(parent.AbsoluteSize.X, parent.AbsoluteSize.Y) * 1.2
     
+    -- Posição inicial mais precisa
+    local startX, startY
     if position then
-        local relX = position.X - parent.AbsolutePosition.X
-        local relY = position.Y - parent.AbsolutePosition.Y
-        ripple.Position = UDim2.new(0, relX - 2, 0, relY - 2)
+        startX = position.X - parent.AbsolutePosition.X
+        startY = position.Y - parent.AbsolutePosition.Y
     else
-        ripple.Position = UDim2.new(0.5, -2, 0.5, -2)
+        startX = parent.AbsoluteSize.X / 2
+        startY = parent.AbsoluteSize.Y / 2
     end
     
-    ripple.Size = UDim2.new(0, 4, 0, 4)
+    ripple.Position = UDim2.new(0, startX, 0, startY)
+    ripple.AnchorPoint = Vector2.new(0.5, 0.5)
+    ripple.Size = UDim2.new(0, 0, 0, 0)
     ripple.Parent = parent
     self:CreateCorner(ripple, UDim.new(1, 0))
     
-    -- Animar
-    local targetSize = UDim2.new(0, maxSize, 0, maxSize)
-    local targetPos = position and 
-        UDim2.new(0, position.X - parent.AbsolutePosition.X - maxSize/2, 0, position.Y - parent.AbsolutePosition.Y - maxSize/2) or
-        UDim2.new(0.5, -maxSize/2, 0.5, -maxSize/2)
-    
+    -- Animar - expandir do centro
     self:Tween(ripple, {
-        Size = targetSize,
-        Position = targetPos,
+        Size = UDim2.new(0, maxSize, 0, maxSize),
         BackgroundTransparency = 1
-    }, 0.5)
+    }, 0.4)
     
-    task.delay(0.5, function()
+    task.delay(0.4, function()
         if ripple and ripple.Parent then
             ripple:Destroy()
         end
@@ -423,19 +422,9 @@ function SpectrumX:CreateWindow(config)
     self.MainFrame.ZIndex = 10
     self.MainFrame.Parent = self.ScreenGui
     self:CreateCorner(self.MainFrame, UDim.new(0, 12))
-    self:CreateShadow(self.MainFrame, 30, 0.65)
     
     -- Borda de destaque
     local mainStroke = self:CreateStroke(self.MainFrame, self.Theme.Accent, 1.5, 0)
-    
-    -- Barra de destaque no topo
-    local accentBar = Instance.new("Frame")
-    accentBar.Name = "AccentBar"
-    accentBar.BackgroundColor3 = self.Theme.Accent
-    accentBar.BorderSizePixel = 0
-    accentBar.Size = UDim2.new(1, 0, 0, 2)
-    accentBar.ZIndex = 15
-    accentBar.Parent = self.MainFrame
     
     -- ─── HEADER ─────────────────────────────────────────────────────────────────
     local headerHeight = self:S(56)
@@ -445,30 +434,9 @@ function SpectrumX:CreateWindow(config)
     self.Header.BackgroundColor3 = self.Theme.Header
     self.Header.BorderSizePixel = 0
     self.Header.Size = UDim2.new(1, 0, 0, headerHeight)
-    self.Header.Position = UDim2.new(0, 0, 0, 2)
     self.Header.ZIndex = 12
     self.Header.Parent = self.MainFrame
     self:CreateCorner(self.Header, UDim.new(0, 10))
-    
-    -- Cover para arredondar só em cima
-    local headerCover = Instance.new("Frame")
-    headerCover.BackgroundColor3 = self.Theme.Header
-    headerCover.BorderSizePixel = 0
-    headerCover.Size = UDim2.new(1, 0, 0, 12)
-    headerCover.Position = UDim2.new(0, 0, 1, -12)
-    headerCover.ZIndex = 12
-    headerCover.Parent = self.Header
-    
-    -- Linha separadora do header
-    local headerLine = Instance.new("Frame")
-    headerLine.Name = "HeaderLine"
-    headerLine.BackgroundColor3 = self.Theme.Accent
-    headerLine.BorderSizePixel = 0
-    headerLine.Size = UDim2.new(1, 0, 0, 1)
-    headerLine.Position = UDim2.new(0, 0, 1, 0)
-    headerLine.ZIndex = 14
-    headerLine.Parent = self.Header
-    self:CreateGradient(headerLine, Color3.fromRGB(0,0,0), self.Theme.Accent, 0)
     
     -- Ícone do header
     local iconX = self:S(16)
@@ -482,12 +450,9 @@ function SpectrumX:CreateWindow(config)
         iconImg.Position = UDim2.new(0, iconX, 0.5, -self:S(16))
         iconImg.Size = UDim2.new(0, self:S(32), 0, self:S(32))
         iconImg.Image = assetId
-        iconImg.ScaleType = Enum.ScaleType.Fit
+        iconImg.ScaleType = Enum.ScaleType.Stretch  -- Cobre todo o espaço
         iconImg.ZIndex = 14
         iconImg.Parent = self.Header
-        
-        local aspect = Instance.new("UIAspectRatioConstraint")
-        aspect.Parent = iconImg
     else
         -- Ícone padrão (letra)
         local iconBg = Instance.new("Frame")
@@ -681,19 +646,6 @@ function SpectrumX:_CreateFloatingButton(config)
     self.FloatBtn.Parent = self.ScreenGui
     self:CreateCorner(self.FloatBtn, UDim.new(0, 14))
     
-    -- Sombra do botão flutuante
-    local shadow = Instance.new("Frame")
-    shadow.Name = "Shadow"
-    shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    shadow.BackgroundColor3 = Color3.new(0, 0, 0)
-    shadow.BackgroundTransparency = 0.7
-    shadow.BorderSizePixel = 0
-    shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-    shadow.Size = UDim2.new(1, 20, 1, 20)
-    shadow.ZIndex = 99
-    shadow.Parent = self.FloatBtn
-    self:CreateCorner(shadow, UDim.new(0, 14))
-    
     -- Ícone do botão flutuante (pode ser diferente do header!)
     -- Prioridade: FloatIconAssetId > FloatIcon > IconAssetId > Icon > "S"
     local floatIconAsset = config.FloatIconAssetId or config.FloatIcon or config.IconAssetId or config.Icon or "S"
@@ -706,9 +658,10 @@ function SpectrumX:_CreateFloatingButton(config)
         local iconImg = Instance.new("ImageLabel")
         iconImg.Name = "Icon"
         iconImg.BackgroundTransparency = 1
-        iconImg.Size = UDim2.new(0.55, 0, 0.55, 0)
-        iconImg.Position = UDim2.new(0.225, 0, 0.225, 0)
+        iconImg.Size = UDim2.new(0.7, 0, 0.7, 0)  -- Maior cobertura
+        iconImg.Position = UDim2.new(0.15, 0, 0.15, 0)
         iconImg.Image = assetId
+        iconImg.ScaleType = Enum.ScaleType.Stretch  -- Cobre todo o espaço
         iconImg.ZIndex = 102
         iconImg.Parent = self.FloatBtn
     elseif hasIconAssetForFloat then
@@ -717,9 +670,10 @@ function SpectrumX:_CreateFloatingButton(config)
         local iconImg = Instance.new("ImageLabel")
         iconImg.Name = "Icon"
         iconImg.BackgroundTransparency = 1
-        iconImg.Size = UDim2.new(0.55, 0, 0.55, 0)
-        iconImg.Position = UDim2.new(0.225, 0, 0.225, 0)
+        iconImg.Size = UDim2.new(0.7, 0, 0.7, 0)
+        iconImg.Position = UDim2.new(0.15, 0, 0.15, 0)
         iconImg.Image = assetId
+        iconImg.ScaleType = Enum.ScaleType.Stretch
         iconImg.ZIndex = 102
         iconImg.Parent = self.FloatBtn
     else
@@ -739,12 +693,10 @@ function SpectrumX:_CreateFloatingButton(config)
     -- Hover effects
     self.FloatBtn.MouseEnter:Connect(function()
         self:Tween(self.FloatBtn, {BackgroundColor3 = self.Theme.AccentHover}, 0.15)
-        self:Tween(shadow, {BackgroundTransparency = 0.5}, 0.15)
     end)
     
     self.FloatBtn.MouseLeave:Connect(function()
         self:Tween(self.FloatBtn, {BackgroundColor3 = self.Theme.Accent}, 0.15)
-        self:Tween(shadow, {BackgroundTransparency = 0.7}, 0.15)
     end)
     
     -- Drag do botão flutuante
@@ -817,18 +769,6 @@ function SpectrumX:CreateTab(config)
     tabBtn.Parent = self.Sidebar
     self:CreateCorner(tabBtn, UDim.new(0, 10))
     
-    -- Indicador lateral (vermelho quando ativo)
-    local indicator = Instance.new("Frame")
-    indicator.Name = "Indicator"
-    indicator.BackgroundColor3 = self.Theme.Accent
-    indicator.BorderSizePixel = 0
-    indicator.Position = UDim2.new(0, -3, 0.2, 0)
-    indicator.Size = UDim2.new(0, 3, 0.6, 0)
-    indicator.Visible = false
-    indicator.ZIndex = 14
-    indicator.Parent = tabBtn
-    self:CreateCorner(indicator, UDim.new(1, 0))
-    
     -- Ícone da tab (suporta Asset ID ou texto)
     local hasIconAsset = config.Icon and self:IsAssetId(config.Icon)
     local hasIconAssetId = config.IconAssetId and self:IsAssetId(config.IconAssetId)
@@ -838,15 +778,13 @@ function SpectrumX:CreateTab(config)
         local iconImg = Instance.new("ImageLabel")
         iconImg.Name = "Icon"
         iconImg.BackgroundTransparency = 1
-        iconImg.Position = UDim2.new(0.5, -10, 0.5, -10)
-        iconImg.Size = UDim2.new(0, 20, 0, 20)
+        iconImg.Position = UDim2.new(0.5, -12, 0.5, -12)
+        iconImg.Size = UDim2.new(0, 24, 0, 24)
         iconImg.Image = assetId
         iconImg.ImageColor3 = self.Theme.TextMuted
+        iconImg.ScaleType = Enum.ScaleType.Stretch
         iconImg.ZIndex = 14
         iconImg.Parent = tabBtn
-        
-        local aspect = Instance.new("UIAspectRatioConstraint")
-        aspect.Parent = iconImg
     else
         local iconLabel = Instance.new("TextLabel")
         iconLabel.Name = "Icon"
@@ -973,7 +911,6 @@ end
 function SpectrumX:SelectTab(tabId)
     for id, data in pairs(self.Tabs) do
         local icon = data.Button:FindFirstChild("Icon")
-        local indicator = data.Button:FindFirstChild("Indicator")
         
         if id == tabId then
             -- Ativar esta tab
@@ -987,10 +924,6 @@ function SpectrumX:SelectTab(tabId)
                     self:Tween(icon, {ImageColor3 = Color3.new(1, 1, 1)}, 0.2)
                 end
             end
-            
-            if indicator then
-                indicator.Visible = true
-            end
         else
             -- Desativar outras tabs
             data.Container.Visible = false
@@ -1002,10 +935,6 @@ function SpectrumX:SelectTab(tabId)
                 elseif icon:IsA("ImageLabel") then
                     self:Tween(icon, {ImageColor3 = self.Theme.TextMuted}, 0.2)
                 end
-            end
-            
-            if indicator then
-                indicator.Visible = false
             end
         end
     end
@@ -2460,19 +2389,6 @@ function SpectrumX:Notify(config)
     notif.ZIndex = 2000  -- Acima de tudo
     notif.Parent = self.ScreenGui
     self:CreateCorner(notif, UDim.new(0, 10))
-    
-    -- CORREÇÃO: Sombra separada (não interfere no conteúdo)
-    local shadow = Instance.new("Frame")
-    shadow.Name = "Shadow"
-    shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-    shadow.BackgroundColor3 = Color3.new(0, 0, 0)
-    shadow.BackgroundTransparency = 0.65
-    shadow.BorderSizePixel = 0
-    shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-    shadow.Size = UDim2.new(1, 18, 1, 18)
-    shadow.ZIndex = 1999  -- Abaixo da notificação
-    shadow.Parent = notif
-    self:CreateCorner(shadow, UDim.new(0, 12))
     
     -- Barra lateral colorida
     local colorBar = Instance.new("Frame")
