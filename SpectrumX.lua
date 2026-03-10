@@ -694,10 +694,26 @@ function SpectrumX:_CreateFloatingButton(config)
     shadow.Parent = self.FloatBtn
     self:CreateCorner(shadow, UDim.new(0, 14))
     
-    -- Ícone do botão
-    local hasIconAsset = config.IconAssetId and self:IsAssetId(config.IconAssetId)
-    if hasIconAsset then
-        local assetId = self:FormatAssetId(config.IconAssetId)
+    -- Ícone do botão flutuante (pode ser diferente do header!)
+    -- Prioridade: FloatIconAssetId > FloatIcon > IconAssetId > Icon > "S"
+    local floatIconAsset = config.FloatIconAssetId or config.FloatIcon or config.IconAssetId or config.Icon or "S"
+    local hasFloatIconAsset = config.FloatIconAssetId and self:IsAssetId(config.FloatIconAssetId)
+    local hasIconAssetForFloat = config.FloatIcon and self:IsAssetId(config.FloatIcon)
+    
+    if hasFloatIconAsset then
+        -- Asset ID específico do botão flutuante
+        local assetId = self:FormatAssetId(config.FloatIconAssetId)
+        local iconImg = Instance.new("ImageLabel")
+        iconImg.Name = "Icon"
+        iconImg.BackgroundTransparency = 1
+        iconImg.Size = UDim2.new(0.55, 0, 0.55, 0)
+        iconImg.Position = UDim2.new(0.225, 0, 0.225, 0)
+        iconImg.Image = assetId
+        iconImg.ZIndex = 102
+        iconImg.Parent = self.FloatBtn
+    elseif hasIconAssetForFloat then
+        -- FloatIcon é um Asset ID
+        local assetId = self:FormatAssetId(config.FloatIcon)
         local iconImg = Instance.new("ImageLabel")
         iconImg.Name = "Icon"
         iconImg.BackgroundTransparency = 1
@@ -707,12 +723,13 @@ function SpectrumX:_CreateFloatingButton(config)
         iconImg.ZIndex = 102
         iconImg.Parent = self.FloatBtn
     else
+        -- Texto/emoji
         local iconLabel = Instance.new("TextLabel")
         iconLabel.Name = "Icon"
         iconLabel.BackgroundTransparency = 1
         iconLabel.Size = UDim2.new(1, 0, 1, 0)
         iconLabel.Font = Enum.Font.GothamBlack
-        iconLabel.Text = config.Icon or "S"
+        iconLabel.Text = floatIconAsset
         iconLabel.TextColor3 = Color3.new(1, 1, 1)
         iconLabel.TextSize = self:S(22)
         iconLabel.ZIndex = 102
