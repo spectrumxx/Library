@@ -1078,8 +1078,8 @@ function GenesisX:CreateToggle(parent, config)
     
     return {
         Frame = frame,
-        GetState = function() return state end,
-        SetState = function(s) state = s; callback(state); update(state) end,
+        GetState = function(self) return state end,
+        SetState = function(self, s) state = s; callback(state); update(state) end,
     }
 end
 
@@ -1184,8 +1184,8 @@ function GenesisX:CreateButton(parent, config)
     return {
         Frame = frame,
         Button = btn,
-        SetText = function(t) btn.Text = t end,
-        SetCallback = function(cb) callback = cb end,
+        SetText = function(self, t) btn.Text = t end,
+        SetCallback = function(self, cb) callback = cb end,
     }
 end
 
@@ -1255,8 +1255,8 @@ function GenesisX:CreateInput(parent, config)
     return {
         Frame = frame,
         TextBox = textBox,
-        GetText = function() return textBox.Text end,
-        SetText = function(t) textBox.Text = t end,
+        GetText = function(self) return textBox.Text end,
+        SetText = function(self, t) textBox.Text = t end,
     }
 end
 
@@ -1333,8 +1333,8 @@ function GenesisX:CreateNumberInput(parent, config)
     return {
         Frame = frame,
         TextBox = textBox,
-        GetValue = function() return tonumber(textBox.Text) end,
-        SetValue = function(v)
+        GetValue = function(self) return tonumber(textBox.Text) end,
+        SetValue = function(self, v)
             v = math.clamp(v, min, max)
             textBox.Text = tostring(v)
         end,
@@ -1479,8 +1479,8 @@ function GenesisX:CreateSlider(parent, config)
     
     return {
         Frame = frame,
-        GetValue = function() return currentValue end,
-        SetValue = function(v)
+        GetValue = function(self) return currentValue end,
+        SetValue = function(self, v)
             v = math.clamp(v, min, max)
             currentValue = v
             local percent = (v - min) / (max - min)
@@ -1769,8 +1769,8 @@ function GenesisX:CreateDropdown(parent, config)
 
     return {
         Frame = frame,
-        GetValue = function() return selected end,
-        SetValue = function(v)
+        GetValue = function(self) return selected end,
+        SetValue = function(self, v)
             selected = v
             dropBtn.Text = "  " .. (v or "Selecionar...")
             dropBtn.TextColor3 = v and self.Theme.Text or self.Theme.TextMuted
@@ -2097,8 +2097,8 @@ function GenesisX:CreateMultiDropdown(parent, config)
 
     return {
         Frame = frame,
-        GetValues = function() return selected end,
-        SetValues = function(v)
+        GetValues = function(self) return selected end,
+        SetValues = function(self, v)
             selected = {}
             for _, val in ipairs(v) do
                 table.insert(selected, val)
@@ -2184,11 +2184,11 @@ function GenesisX:CreateCheckbox(parent, config)
     
     return {
         Frame = frame,
-        GetState = function() return state end,
-        SetState = function(s)
+        GetState = function(self) return state end,
+        SetState = function(self, s)
             state = s
             callback(state)
-            self:Tween(checkbox, {BackgroundColor3 = state and self.Theme.Accent or self.Theme.Input}, 0.2)
+            GenesisX:Tween(checkbox, {BackgroundColor3 = state and self.Theme.Accent or self.Theme.Input}, 0.2)
             checkbox.Text = state and "✓" or ""
         end,
     }
@@ -2359,16 +2359,16 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
 
         table.insert(buttonObjects, {
             Button = btn,
-            SetText = function(t) btn.Text = t end,
-            SetCallback = function(cb) btnCallback = cb end,
+            SetText = function(self, t) btn.Text = t end,
+            SetCallback = function(self, cb) btnCallback = cb end,
         })
     end
 
     return {
         Frame = frame,
         Title = titleLabel,
-        SetTitle = function(t) titleLabel.Text = t end,
-        SetTitleColor = function(c) titleLabel.TextColor3 = c end,
+        SetTitle = function(self, t) titleLabel.Text = t end,
+        SetTitleColor = function(self, c) titleLabel.TextColor3 = c end,
         Buttons = buttonObjects,
     }
 end
@@ -2435,10 +2435,10 @@ function GenesisX:CreateLabel(parent, config)
     return {
         Frame = frame,
         Label = label,
-        SetText = function(t)
+        SetText = function(self, t)
             label.Text = t
         end,
-        SetColor = function(c)
+        SetColor = function(self, c)
             label.TextColor3 = c
         end,
     }
@@ -2598,17 +2598,26 @@ function GenesisX:CreateStatusCard(parent, config)
     
     return {
         Frame = frame,
-        SetStatus = function(status, color)
-            statusLabel.Text = "● " .. status
+        SetStatus = function(self, maybe_color_or_status, maybe_color)
+            local status, color
+            if type(self_or_status) == "table" then
+                status = maybe_color_or_status
+                color = maybe_color
+            else
+                status = self_or_status
+                color = maybe_color_or_status
+            end
+            statusLabel.Text = "● " .. tostring(status)
             statusLabel.TextColor3 = color or self.Theme.TextMuted
         end,
-        SetInfo = function(info)
-            infoLabel.Text = info
+        SetInfo = function(self, maybe_info)
+            local info = type(self_or_info) == "table" and maybe_info or self_or_info
+            infoLabel.Text = tostring(info)
         end,
-        SetProgress = function(percent)
+        SetProgress = function(self, percent)
             bar.Size = UDim2.new(math.clamp(percent, 0, 1), 0, 1, 0)
         end,
-        AnimateLoading = function(active, duration)
+        AnimateLoading = function(self, active, duration)
             if active then
                 spawn(function()
                     while active and frame and frame.Parent do
