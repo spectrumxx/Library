@@ -1,25 +1,5 @@
---[[
-    ╔══════════════════════════════════════════════════════════════════════════╗
-    ║                         SpectrumX UI Library v2.0                        ║
-    ║                    Professional UI Library for Roblox                    ║
-    ╚══════════════════════════════════════════════════════════════════════════╝
-    
-    Melhorias na v2.0:
-    - Sistema de sombras profissional corrigido
-    - Notificações sem bugs de sobreposição
-    - Labels com quebra de linha automática
-    - Suporte completo a Asset IDs para ícones
-    - Código modular e organizado
-    - 100% compatível com versões anteriores
-    
-    Uso:
-        local SpectrumX = loadstring(readfile("path/to/SpectrumX.lua"))()
-        local Window = SpectrumX:CreateWindow({Title = "Meu Script", Icon = "⭐"})
-        local Tab = Window:CreateTab({Name = "Main", Icon = "rbxassetid://123456"})
---]]
-
-local SpectrumX = {}
-SpectrumX.__index = SpectrumX
+local GenesisX = {}
+GenesisX.__index = GenesisX
 
 -- ─── SERVIÇOS ─────────────────────────────────────────────────────────────────
 local Players = game:GetService("Players")
@@ -31,8 +11,8 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ─── THEME ────────────────────────────────────────────────────────────────────
-SpectrumX.Theme = {
-    -- Cores base
+GenesisX.Theme = {
+    -- Cores base (neutros escuros)
     Background = Color3.fromRGB(8, 8, 8),
     Header = Color3.fromRGB(12, 12, 12),
     Sidebar = Color3.fromRGB(10, 10, 10),
@@ -41,34 +21,36 @@ SpectrumX.Theme = {
     Input = Color3.fromRGB(22, 22, 22),
     InputHover = Color3.fromRGB(30, 30, 30),
     
-    -- Cores de destaque (roxo claro)
-    Accent = Color3.fromRGB(160, 80, 230),        -- roxo principal
-    AccentHover = Color3.fromRGB(190, 110, 255),  -- roxo mais claro no hover
-    AccentSecondary = Color3.fromRGB(210, 140, 255), -- lilás/rosa claro
-    AccentDark = Color3.fromRGB(100, 40, 160),    -- roxo escuro
+    -- Cores de destaque (roxo vibrante)
+    Accent = Color3.fromRGB(150, 80, 230),         -- roxo principal
+    AccentHover = Color3.fromRGB(180, 110, 255),   -- roxo claro no hover
+    AccentSecondary = Color3.fromRGB(210, 160, 255), -- lilás claro
+    AccentDark = Color3.fromRGB(90, 40, 160),      -- roxo profundo
     
     -- Texto
     Text = Color3.fromRGB(255, 255, 255),
     TextSecondary = Color3.fromRGB(190, 190, 190),
     TextMuted = Color3.fromRGB(120, 120, 120),
     
-    -- Estados
-    Success = Color3.fromRGB(60, 220, 100),
-    Warning = Color3.fromRGB(255, 190, 60),
-    Info = Color3.fromRGB(80, 160, 255),
-    Error = Color3.fromRGB(255, 55, 55),          -- mantive vermelho puro pro erro
+    -- Estados (todos na família roxa, diferenciados por intensidade)
+    -- Quanto mais claro/brilhante = positivo/sucesso
+    -- Quanto mais escuro/profundo = alerta/erro
+    Success = Color3.fromRGB(220, 190, 255),  -- lilás bem claro (positivo)
+    Warning = Color3.fromRGB(190, 130, 255),  -- roxo médio-alto (atenção)
+    Info = Color3.fromRGB(140, 90, 220),      -- violeta médio (informação)
+    Error = Color3.fromRGB(80, 40, 140),      -- roxo profundo escuro (perigo)
     
-    -- Bordas
-    Border = Color3.fromRGB(35, 35, 35),
-    BorderBright = Color3.fromRGB(55, 55, 55),
+    -- Bordas (leve tom roxo pra manter coesão, sem vermelho)
+    Border = Color3.fromRGB(40, 35, 50),      -- borda escura com fundo roxo
+    BorderBright = Color3.fromRGB(75, 65, 90), -- borda clara lilás escuro
     
     -- Toggle
-    ToggleOff = Color3.fromRGB(35, 35, 35),
-    ToggleOn = Color3.fromRGB(160, 80, 230),      -- roxo (ligado ao Accent)
+    ToggleOff = Color3.fromRGB(35, 30, 45),   -- roxo bem escuro (desligado)
+    ToggleOn = Color3.fromRGB(150, 80, 230), -- roxo principal (ligado)
 }
 
 -- ─── CONFIGURAÇÕES ────────────────────────────────────────────────────────────
-SpectrumX.Config = {
+GenesisX.Config = {
     AnimationSpeed = 0.2,
     CornerRadius = 8,
     ShadowEnabled = true,
@@ -82,7 +64,7 @@ local ScaleData = {
     BaseResolution = Vector2.new(1920, 1080)
 }
 
-function SpectrumX:UpdateScale()
+function GenesisX:UpdateScale()
     local success, camera = pcall(function() return workspace.CurrentCamera end)
     if not success or not camera then return end
     
@@ -100,7 +82,7 @@ function SpectrumX:UpdateScale()
     end
 end
 
-function SpectrumX:S(value)
+function GenesisX:S(value)
     if type(value) == "number" then
         return math.floor(value * ScaleData.ScaleFactor)
     elseif typeof(value) == "UDim2" then
@@ -117,7 +99,7 @@ function SpectrumX:S(value)
 end
 
 -- ─── UTILITÁRIOS BÁSICOS ──────────────────────────────────────────────────────
-function SpectrumX:Tween(obj, props, time, style, direction)
+function GenesisX:Tween(obj, props, time, style, direction)
     if not obj or not obj.Parent then return nil end
     
     local tweenInfo = TweenInfo.new(
@@ -131,14 +113,14 @@ function SpectrumX:Tween(obj, props, time, style, direction)
     return tween
 end
 
-function SpectrumX:CreateCorner(parent, radius)
+function GenesisX:CreateCorner(parent, radius)
     local corner = Instance.new("UICorner")
     corner.CornerRadius = radius or UDim.new(0, self.Config.CornerRadius)
     corner.Parent = parent
     return corner
 end
 
-function SpectrumX:CreateStroke(parent, color, thickness, transparency)
+function GenesisX:CreateStroke(parent, color, thickness, transparency)
     local stroke = Instance.new("UIStroke")
     stroke.Color = color or self.Theme.Border
     stroke.Thickness = thickness or 1
@@ -148,7 +130,7 @@ function SpectrumX:CreateStroke(parent, color, thickness, transparency)
     return stroke
 end
 
-function SpectrumX:CreateGradient(parent, color1, color2, rotation)
+function GenesisX:CreateGradient(parent, color1, color2, rotation)
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new(color1 or Color3.new(1,1,1), color2 or Color3.new(0,0,0))
     gradient.Rotation = rotation or 0
@@ -157,7 +139,7 @@ function SpectrumX:CreateGradient(parent, color1, color2, rotation)
 end
 
 -- ─── SISTEMA DE SOMBRAS PROFISSIONAL ──────────────────────────────────────────
-function SpectrumX:CreateShadow(parent, size, intensity)
+function GenesisX:CreateShadow(parent, size, intensity)
     if not self.Config.ShadowEnabled then return nil end
     
     size = size or 20
@@ -187,7 +169,7 @@ function SpectrumX:CreateShadow(parent, size, intensity)
 end
 
 -- ─── SOMBRA SIMPLES ───────────────────────────────────────────────────────────
-function SpectrumX:CreateSimpleShadow(parent, size, transparency)
+function GenesisX:CreateSimpleShadow(parent, size, transparency)
     if not self.Config.ShadowEnabled then return nil end
     
     local shadow = Instance.new("Frame")
@@ -206,7 +188,7 @@ function SpectrumX:CreateSimpleShadow(parent, size, transparency)
 end
 
 -- ─── DRAGGABLE ────────────────────────────────────────────────────────────────
-function SpectrumX:MakeDraggable(frame, handle)
+function GenesisX:MakeDraggable(frame, handle)
     handle = handle or frame
     
     local dragging = false
@@ -248,7 +230,7 @@ function SpectrumX:MakeDraggable(frame, handle)
 end
 
 -- ─── RIPPLE EFFECT ────────────────────────────────────────────────────────────
-function SpectrumX:CreateRipple(parent, position)
+function GenesisX:CreateRipple(parent, position)
     local ripple = Instance.new("Frame")
     ripple.Name = "Ripple"
     ripple.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -289,12 +271,12 @@ function SpectrumX:CreateRipple(parent, position)
 end
 
 -- ─── HELPERS DE ÍCONE ─────────────────────────────────────────────────────────
-function SpectrumX:IsAssetId(value)
+function GenesisX:IsAssetId(value)
     if type(value) ~= "string" then return false end
     return value:match("^rbxassetid://") ~= nil or value:match("^%d+$") ~= nil
 end
 
-function SpectrumX:FormatAssetId(value)
+function GenesisX:FormatAssetId(value)
     if type(value) == "number" then
         return "rbxassetid://" .. value
     elseif type(value) == "string" then
@@ -307,7 +289,7 @@ function SpectrumX:FormatAssetId(value)
     return nil
 end
 
-function SpectrumX:CreateIcon(parent, iconData, size, color)
+function GenesisX:CreateIcon(parent, iconData, size, color)
     size = size or UDim2.new(0, 20, 0, 20)
     color = color or self.Theme.Text
     
@@ -343,7 +325,7 @@ function SpectrumX:CreateIcon(parent, iconData, size, color)
 end
 
 -- ─── REGISTRO DE DROPDOWNS ────────────────────────────────────────────────────
-function SpectrumX:_RegisterDropdown(list, button, closeFunction)
+function GenesisX:_RegisterDropdown(list, button, closeFunction)
     if not self._dropdowns then self._dropdowns = {} end
     table.insert(self._dropdowns, {
         List = list,
@@ -354,7 +336,7 @@ function SpectrumX:_RegisterDropdown(list, button, closeFunction)
     table.insert(self.Dropdowns, list)
 end
 
-function SpectrumX:_CloseDropdownsOnClick(position)
+function GenesisX:_CloseDropdownsOnClick(position)
     if not self._dropdowns then return end
     
     for _, dropdown in ipairs(self._dropdowns) do
@@ -379,20 +361,20 @@ end
 
 
 -- ─── CREATE WINDOW ────────────────────────────────────────────────────────────
-function SpectrumX:CreateWindow(config)
+function GenesisX:CreateWindow(config)
     config = config or {}
     local window = setmetatable({}, self)
     
     self:UpdateScale()
     
     -- Destruir UI anterior se existir
-    if PlayerGui:FindFirstChild("SpectrumX") then
-        PlayerGui.SpectrumX:Destroy()
+    if PlayerGui:FindFirstChild("GenesisX") then
+        PlayerGui.GenesisX:Destroy()
     end
     
     -- ScreenGui principal
     self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = "SpectrumX"
+    self.ScreenGui.Name = "GenesisX"
     self.ScreenGui.Parent = PlayerGui
     self.ScreenGui.ResetOnSpawn = false
     self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
@@ -631,7 +613,7 @@ end
 
 
 -- ─── FLOATING BUTTON ──────────────────────────────────────────────────────────
-function SpectrumX:_CreateFloatingButton(config)
+function GenesisX:_CreateFloatingButton(config)
     config = config or {}
     local btnSize = self:S(52)
     
@@ -752,7 +734,7 @@ function SpectrumX:_CreateFloatingButton(config)
 end
 
 -- ─── CREATE TAB ───────────────────────────────────────────────────────────────
-function SpectrumX:CreateTab(config)
+function GenesisX:CreateTab(config)
     config = config or {}
     local tabId = config.Name or "Tab"
     local tabIcon = config.Icon or tabId:sub(1, 1)
@@ -908,7 +890,7 @@ function SpectrumX:CreateTab(config)
 end
 
 -- ─── SELECT TAB ───────────────────────────────────────────────────────────────
-function SpectrumX:SelectTab(tabId)
+function GenesisX:SelectTab(tabId)
     for id, data in pairs(self.Tabs) do
         local icon = data.Button:FindFirstChild("Icon")
         
@@ -943,7 +925,7 @@ function SpectrumX:SelectTab(tabId)
 end
 
 -- ─── CREATE SECTION ───────────────────────────────────────────────────────────
-function SpectrumX:CreateSection(parent, text, color)
+function GenesisX:CreateSection(parent, text, color)
     local wrap = Instance.new("Frame")
     wrap.Name = "Section_" .. text
     wrap.BackgroundTransparency = 1
@@ -982,7 +964,7 @@ end
 
 
 -- ─── CREATE TOGGLE ────────────────────────────────────────────────────────────
-function SpectrumX:CreateToggle(parent, config)
+function GenesisX:CreateToggle(parent, config)
     config = config or {}
     local text = config.Text or "Toggle"
     local default = config.Default or false
@@ -1102,7 +1084,7 @@ function SpectrumX:CreateToggle(parent, config)
 end
 
 -- ─── CREATE BUTTON ────────────────────────────────────────────────────────────
-function SpectrumX:CreateButton(parent, config)
+function GenesisX:CreateButton(parent, config)
     config = config or {}
     local text = config.Text or "Button"
     local style = config.Style or "default"
@@ -1208,7 +1190,7 @@ function SpectrumX:CreateButton(parent, config)
 end
 
 -- ─── CREATE INPUT ─────────────────────────────────────────────────────────────
-function SpectrumX:CreateInput(parent, config)
+function GenesisX:CreateInput(parent, config)
     config = config or {}
     local labelText = config.Label or "Input"
     local default = config.Default or ""
@@ -1279,7 +1261,7 @@ function SpectrumX:CreateInput(parent, config)
 end
 
 -- ─── CREATE NUMBER INPUT ──────────────────────────────────────────────────────
-function SpectrumX:CreateNumberInput(parent, config)
+function GenesisX:CreateNumberInput(parent, config)
     config = config or {}
     local labelText = config.Label or "Number"
     local default = config.Default or 0
@@ -1362,7 +1344,7 @@ end
 
 
 -- ─── CREATE SLIDER ────────────────────────────────────────────────────────────
-function SpectrumX:CreateSlider(parent, config)
+function GenesisX:CreateSlider(parent, config)
     config = config or {}
     local text = config.Text or "Slider"
     local min = config.Min or 0
@@ -1528,15 +1510,15 @@ local function getDropdownPosition(button, layout, maxHeight)
 end
 
 -- ─── CREATE DROPDOWN ────────────────────────────────────────────────────────────
-function SpectrumX:CreateDropdown(parent, config)
+function GenesisX:CreateDropdown(parent, config)
     config = config or {}
     local labelText = config.Label or "Dropdown"
     local options = config.Options or {}
     local default = config.Default
     local callback = config.Callback or function() end
-    
+
     local height = self:S(62)
-    
+
     local frame = Instance.new("Frame")
     frame.Name = "Dropdown_" .. labelText
     frame.BackgroundColor3 = self.Theme.Card
@@ -1546,8 +1528,7 @@ function SpectrumX:CreateDropdown(parent, config)
     frame.Parent = parent
     self:CreateCorner(frame)
     self:CreateStroke(frame, self.Theme.Border, 1, 0.4)
-    
-    -- Label
+
     local label = Instance.new("TextLabel")
     label.Name = "Label"
     label.BackgroundTransparency = 1
@@ -1560,8 +1541,7 @@ function SpectrumX:CreateDropdown(parent, config)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.ZIndex = 13
     label.Parent = frame
-    
-    -- Botão do dropdown
+
     local dropBtn = Instance.new("TextButton")
     dropBtn.Name = "DropBtn"
     dropBtn.BackgroundColor3 = self.Theme.Input
@@ -1576,10 +1556,9 @@ function SpectrumX:CreateDropdown(parent, config)
     dropBtn.ZIndex = 14
     dropBtn.Parent = frame
     self:CreateCorner(dropBtn, UDim.new(0, 6))
-    
+
     local dropStroke = self:CreateStroke(dropBtn, self.Theme.Border, 1, 0.4)
-    
-    -- Seta
+
     local arrow = Instance.new("TextLabel")
     arrow.Name = "Arrow"
     arrow.BackgroundTransparency = 1
@@ -1591,96 +1570,131 @@ function SpectrumX:CreateDropdown(parent, config)
     arrow.TextSize = self:S(14)
     arrow.ZIndex = 15
     arrow.Parent = dropBtn
-    
-    -- Lista do dropdown
-    local dropList = Instance.new("ScrollingFrame")
-    dropList.Name = "DropList"
-    dropList.BackgroundColor3 = self.Theme.Card
-    dropList.Size = UDim2.new(0, 0, 0, 0)
-    dropList.ScrollBarThickness = 3
-    dropList.ScrollBarImageColor3 = self.Theme.Accent
-    dropList.Visible = false
-    dropList.ZIndex = 100
-    dropList.BorderSizePixel = 0
-    dropList.Parent = self.ScreenGui
-    self:CreateCorner(dropList, UDim.new(0, 8))
-    self:CreateStroke(dropList, self.Theme.Accent, 1.5, 0.2)
-    
-    local listLayout = Instance.new("UIListLayout")
-    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    listLayout.Padding = UDim.new(0, self:S(3))
-    listLayout.Parent = dropList
-    
-    local listPadding = Instance.new("UIPadding")
-    listPadding.PaddingTop = UDim.new(0, 5)
-    listPadding.PaddingBottom = UDim.new(0, 5)
-    listPadding.PaddingLeft = UDim.new(0, 5)
-    listPadding.PaddingRight = UDim.new(0, 5)
-    listPadding.Parent = dropList
-    
+
     local selected = default
     local isOpen = false
-    local maxHeight = self:S(200)
-    
+
+    -- Overlay escurecido (fundo)
+    local overlay = Instance.new("Frame")
+    overlay.Name = "DropdownOverlay"
+    overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+    overlay.BackgroundTransparency = 1
+    overlay.BorderSizePixel = 0
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.ZIndex = 500
+    overlay.Visible = false
+    overlay.Parent = self.ScreenGui
+
+    -- Container da lista (centralizado, grande)
+    local listContainer = Instance.new("Frame")
+    listContainer.Name = "ListContainer"
+    listContainer.BackgroundColor3 = self.Theme.Card
+    listContainer.BorderSizePixel = 0
+    listContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    listContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    listContainer.Size = UDim2.new(0, 0, 0, 0)
+    listContainer.ZIndex = 501
+    listContainer.Visible = false
+    listContainer.Parent = overlay
+    self:CreateCorner(listContainer, UDim.new(0, 12))
+    self:CreateStroke(listContainer, self.Theme.Accent, 1.5, 0.3)
+
+    -- Título do dropdown no container
+    local listTitle = Instance.new("TextLabel")
+    listTitle.Name = "Title"
+    listTitle.BackgroundTransparency = 1
+    listTitle.Position = UDim2.new(0, self:S(16), 0, self:S(12))
+    listTitle.Size = UDim2.new(1, -self:S(32), 0, self:S(22))
+    listTitle.Font = Enum.Font.GothamBold
+    listTitle.Text = labelText
+    listTitle.TextColor3 = self.Theme.Text
+    listTitle.TextSize = self:S(14)
+    listTitle.TextXAlignment = Enum.TextXAlignment.Left
+    listTitle.ZIndex = 502
+    listTitle.Parent = listContainer
+
+    -- ScrollingFrame da lista
+    local dropList = Instance.new("ScrollingFrame")
+    dropList.Name = "DropList"
+    dropList.BackgroundTransparency = 1
+    dropList.BorderSizePixel = 0
+    dropList.Position = UDim2.new(0, self:S(12), 0, self:S(40))
+    dropList.Size = UDim2.new(1, -self:S(24), 1, -self:S(52))
+    dropList.ScrollBarThickness = 4
+    dropList.ScrollBarImageColor3 = self.Theme.Accent
+    dropList.ScrollBarImageTransparency = 0.4
+    dropList.ZIndex = 502
+    dropList.Parent = listContainer
+
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Padding = UDim.new(0, self:S(4))
+    listLayout.Parent = dropList
+
+    local listPadding = Instance.new("UIPadding")
+    listPadding.PaddingTop = UDim.new(0, self:S(4))
+    listPadding.PaddingBottom = UDim.new(0, self:S(4))
+    listPadding.Parent = dropList
+
     local function closeDropdown()
         if not isOpen then return end
         isOpen = false
-        self:Tween(dropList, {Size = UDim2.new(0, dropBtn.AbsoluteSize.X, 0, 0)}, 0.2)
+        self:Tween(overlay, {BackgroundTransparency = 1}, 0.2)
+        self:Tween(listContainer, {Size = UDim2.new(0, self:S(320), 0, 0)}, 0.2)
         self:Tween(arrow, {Rotation = 0}, 0.2)
         if dropStroke then
             self:Tween(dropStroke, {Color = self.Theme.Border, Transparency = 0.4}, 0.2)
         end
         task.wait(0.2)
-        if dropList and dropList.Parent then
-            dropList.Visible = false
-        end
+        overlay.Visible = false
+        listContainer.Visible = false
     end
-    
-    self:_RegisterDropdown(dropList, dropBtn, closeDropdown)
-    
+
     local function populate()
         for _, child in ipairs(dropList:GetChildren()) do
             if child:IsA("Frame") then child:Destroy() end
         end
-        
+
         for _, option in ipairs(options) do
             local isSelected = option == selected
-            
+
             local row = Instance.new("Frame")
-            row.BackgroundColor3 = isSelected and Color3.fromRGB(40, 10, 10) or self.Theme.Input
-            row.Size = UDim2.new(1, 0, 0, self:S(30))
-            row.ZIndex = 101
+            row.BackgroundColor3 = isSelected and self.Theme.AccentDark or self.Theme.Input
+            row.Size = UDim2.new(1, 0, 0, self:S(36))
+            row.ZIndex = 503
             row.Parent = dropList
-            self:CreateCorner(row, UDim.new(0, 5))
-            
+            self:CreateCorner(row, UDim.new(0, 8))
+
             if isSelected then
                 self:CreateStroke(row, self.Theme.Accent, 1, 0.2)
-                
-                -- Indicador
-                local dot = Instance.new("Frame")
-                dot.BackgroundColor3 = self.Theme.Accent
-                dot.Position = UDim2.new(0, self:S(8), 0.5, -self:S(4))
-                dot.Size = UDim2.new(0, self:S(8), 0, self:S(8))
-                dot.ZIndex = 102
-                dot.Parent = row
-                self:CreateCorner(dot, UDim.new(1, 0))
+
+                local check = Instance.new("TextLabel")
+                check.BackgroundTransparency = 1
+                check.Position = UDim2.new(0, self:S(10), 0, 0)
+                check.Size = UDim2.new(0, self:S(24), 1, 0)
+                check.Font = Enum.Font.GothamBold
+                check.Text = "✓"
+                check.TextColor3 = self.Theme.AccentSecondary
+                check.TextSize = self:S(14)
+                check.ZIndex = 504
+                check.Parent = row
             end
-            
+
             local rowBtn = Instance.new("TextButton")
             rowBtn.BackgroundTransparency = 1
             rowBtn.Size = UDim2.new(1, 0, 1, 0)
             rowBtn.Font = Enum.Font.GothamSemibold
-            rowBtn.Text = (isSelected and "   " or "  ") .. option
-            rowBtn.TextColor3 = isSelected and self.Theme.AccentSecondary or self.Theme.TextSecondary
+            rowBtn.Text = (isSelected and "    " or "  ") .. option
+            rowBtn.TextColor3 = isSelected and self.Theme.AccentSecondary or self.Theme.Text
             rowBtn.TextSize = self:S(12)
             rowBtn.TextXAlignment = Enum.TextXAlignment.Left
-            rowBtn.ZIndex = 102
+            rowBtn.ZIndex = 504
             rowBtn.Parent = row
-            
+
             local rowPad = Instance.new("UIPadding")
-            rowPad.PaddingLeft = UDim.new(0, self:S(12))
+            rowPad.PaddingLeft = UDim.new(0, isSelected and self:S(32) or self:S(12))
             rowPad.Parent = rowBtn
-            
+
             rowBtn.MouseButton1Click:Connect(function()
                 selected = option
                 dropBtn.Text = "  " .. option
@@ -1688,13 +1702,13 @@ function SpectrumX:CreateDropdown(parent, config)
                 callback(option)
                 closeDropdown()
             end)
-            
+
             rowBtn.MouseEnter:Connect(function()
                 if not isSelected then
                     self:Tween(row, {BackgroundColor3 = self.Theme.CardHover}, 0.1)
                 end
             end)
-            
+
             rowBtn.MouseLeave:Connect(function()
                 if not isSelected then
                     self:Tween(row, {BackgroundColor3 = self.Theme.Input}, 0.1)
@@ -1702,68 +1716,79 @@ function SpectrumX:CreateDropdown(parent, config)
             end)
         end
     end
-    
+
     dropBtn.MouseEnter:Connect(function()
         self:Tween(dropBtn, {BackgroundColor3 = self.Theme.InputHover}, 0.15)
     end)
-    
+
     dropBtn.MouseLeave:Connect(function()
         self:Tween(dropBtn, {BackgroundColor3 = self.Theme.Input}, 0.15)
     end)
-    
+
     dropBtn.MouseButton1Click:Connect(function()
         if isOpen then
             closeDropdown()
             return
         end
-        
-        -- Fechar outros dropdowns
-        for _, dd in ipairs(self.Dropdowns) do
-            if dd ~= dropList then dd.Visible = false end
-        end
-        
+
         populate()
-        local pos, targetH, contentH = getDropdownPosition(dropBtn, listLayout, maxHeight)
-        dropList.Position = pos
-        dropList.Size = UDim2.new(0, dropBtn.AbsoluteSize.X, 0, 0)
-        dropList.CanvasSize = UDim2.new(0, 0, 0, contentH)
-        dropList.Visible = true
-        
-        self:Tween(dropList, {Size = UDim2.new(0, dropBtn.AbsoluteSize.X, 0, targetH)}, 0.25,
-            Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+        local contentHeight = listLayout.AbsoluteContentSize.Y + self:S(60)
+        local targetHeight = math.min(contentHeight, self:S(360))
+        local targetWidth = self:S(320)
+
+        overlay.Visible = true
+        listContainer.Visible = true
+        overlay.BackgroundTransparency = 1
+        listContainer.Size = UDim2.new(0, targetWidth, 0, 0)
+
+        self:Tween(overlay, {BackgroundTransparency = 0.45}, 0.25)
+        self:Tween(listContainer, {Size = UDim2.new(0, targetWidth, 0, targetHeight)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
         self:Tween(arrow, {Rotation = 180}, 0.2)
         if dropStroke then
             self:Tween(dropStroke, {Color = self.Theme.Accent, Transparency = 0.2}, 0.2)
         end
+
+        dropList.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + self:S(16))
         isOpen = true
     end)
-    
+
+    overlay.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            local pos = input.Position
+            local listPos = listContainer.AbsolutePosition
+            local listSize = listContainer.AbsoluteSize
+            local inList = pos.X >= listPos.X and pos.X <= listPos.X + listSize.X and
+                          pos.Y >= listPos.Y and pos.Y <= listPos.Y + listSize.Y
+            if not inList then
+                closeDropdown()
+            end
+        end
+    end)
+
     return {
         Frame = frame,
         GetValue = function() return selected end,
         SetValue = function(v)
             selected = v
             dropBtn.Text = "  " .. (v or "Selecionar...")
+            dropBtn.TextColor3 = v and self.Theme.Text or self.Theme.TextMuted
         end,
         SetOptions = function(newOptions)
             options = newOptions
-            if isOpen then populate() end
         end,
     }
 end
-
-
-
--- ─── CREATE MULTI DROPDOWN ────────────────────────────────────────────────────
-function SpectrumX:CreateMultiDropdown(parent, config)
+function GenesisX:CreateMultiDropdown(parent, config)
     config = config or {}
     local labelText = config.Label or "Multi Select"
     local options = config.Options or {}
     local default = config.Default or {}
     local callback = config.Callback or function() end
-    
+
     local height = self:S(62)
-    
+
     local frame = Instance.new("Frame")
     frame.Name = "MultiDropdown_" .. labelText
     frame.BackgroundColor3 = self.Theme.Card
@@ -1773,8 +1798,7 @@ function SpectrumX:CreateMultiDropdown(parent, config)
     frame.Parent = parent
     self:CreateCorner(frame)
     self:CreateStroke(frame, self.Theme.Border, 1, 0.4)
-    
-    -- Label
+
     local label = Instance.new("TextLabel")
     label.Name = "Label"
     label.BackgroundTransparency = 1
@@ -1787,8 +1811,7 @@ function SpectrumX:CreateMultiDropdown(parent, config)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.ZIndex = 13
     label.Parent = frame
-    
-    -- Botão
+
     local dropBtn = Instance.new("TextButton")
     dropBtn.Name = "DropBtn"
     dropBtn.BackgroundColor3 = self.Theme.Input
@@ -1803,10 +1826,9 @@ function SpectrumX:CreateMultiDropdown(parent, config)
     dropBtn.ZIndex = 14
     dropBtn.Parent = frame
     self:CreateCorner(dropBtn, UDim.new(0, 6))
-    
+
     local dropStroke = self:CreateStroke(dropBtn, self.Theme.Border, 1, 0.4)
-    
-    -- Seta
+
     local arrow = Instance.new("TextLabel")
     arrow.Name = "Arrow"
     arrow.BackgroundTransparency = 1
@@ -1818,38 +1840,89 @@ function SpectrumX:CreateMultiDropdown(parent, config)
     arrow.TextSize = self:S(14)
     arrow.ZIndex = 15
     arrow.Parent = dropBtn
-    
-    -- Lista
+
+    -- Estado LOCAL (não compartilhado entre instâncias)
+    local selected = {}
+    for _, v in ipairs(default) do
+        table.insert(selected, v)
+    end
+    local isOpen = false
+
+    -- Overlay escurecido
+    local overlay = Instance.new("Frame")
+    overlay.Name = "MultiDropdownOverlay"
+    overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+    overlay.BackgroundTransparency = 1
+    overlay.BorderSizePixel = 0
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.ZIndex = 500
+    overlay.Visible = false
+    overlay.Parent = self.ScreenGui
+
+    -- Container da lista
+    local listContainer = Instance.new("Frame")
+    listContainer.Name = "ListContainer"
+    listContainer.BackgroundColor3 = self.Theme.Card
+    listContainer.BorderSizePixel = 0
+    listContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    listContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    listContainer.Size = UDim2.new(0, 0, 0, 0)
+    listContainer.ZIndex = 501
+    listContainer.Visible = false
+    listContainer.Parent = overlay
+    self:CreateCorner(listContainer, UDim.new(0, 12))
+    self:CreateStroke(listContainer, self.Theme.Accent, 1.5, 0.3)
+
+    -- Header com título e contador
+    local listTitle = Instance.new("TextLabel")
+    listTitle.Name = "Title"
+    listTitle.BackgroundTransparency = 1
+    listTitle.Position = UDim2.new(0, self:S(16), 0, self:S(12))
+    listTitle.Size = UDim2.new(0.6, 0, 0, self:S(22))
+    listTitle.Font = Enum.Font.GothamBold
+    listTitle.Text = labelText
+    listTitle.TextColor3 = self.Theme.Text
+    listTitle.TextSize = self:S(14)
+    listTitle.TextXAlignment = Enum.TextXAlignment.Left
+    listTitle.ZIndex = 502
+    listTitle.Parent = listContainer
+
+    local countBadge = Instance.new("TextLabel")
+    countBadge.Name = "CountBadge"
+    countBadge.BackgroundColor3 = self.Theme.Accent
+    countBadge.Position = UDim2.new(1, -self:S(48), 0, self:S(10))
+    countBadge.Size = UDim2.new(0, self:S(36), 0, self:S(22))
+    countBadge.Font = Enum.Font.GothamBold
+    countBadge.Text = "0"
+    countBadge.TextColor3 = Color3.new(1, 1, 1)
+    countBadge.TextSize = self:S(11)
+    countBadge.ZIndex = 502
+    countBadge.Parent = listContainer
+    self:CreateCorner(countBadge, UDim.new(0, 6))
+
+    -- ScrollingFrame
     local dropList = Instance.new("ScrollingFrame")
-    dropList.Name = "MultiDropList"
-    dropList.BackgroundColor3 = self.Theme.Card
-    dropList.Size = UDim2.new(0, 0, 0, 0)
-    dropList.ScrollBarThickness = 3
-    dropList.ScrollBarImageColor3 = self.Theme.Accent
-    dropList.Visible = false
-    dropList.ZIndex = 100
+    dropList.Name = "DropList"
+    dropList.BackgroundTransparency = 1
     dropList.BorderSizePixel = 0
-    dropList.Parent = self.ScreenGui
-    self:CreateCorner(dropList, UDim.new(0, 8))
-    self:CreateStroke(dropList, self.Theme.Accent, 1.5, 0.2)
-    
+    dropList.Position = UDim2.new(0, self:S(12), 0, self:S(42))
+    dropList.Size = UDim2.new(1, -self:S(24), 1, -self:S(56))
+    dropList.ScrollBarThickness = 4
+    dropList.ScrollBarImageColor3 = self.Theme.Accent
+    dropList.ScrollBarImageTransparency = 0.4
+    dropList.ZIndex = 502
+    dropList.Parent = listContainer
+
     local listLayout = Instance.new("UIListLayout")
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    listLayout.Padding = UDim.new(0, self:S(3))
+    listLayout.Padding = UDim.new(0, self:S(4))
     listLayout.Parent = dropList
-    
+
     local listPadding = Instance.new("UIPadding")
-    listPadding.PaddingTop = UDim.new(0, 5)
-    listPadding.PaddingBottom = UDim.new(0, 5)
-    listPadding.PaddingLeft = UDim.new(0, 5)
-    listPadding.PaddingRight = UDim.new(0, 5)
+    listPadding.PaddingTop = UDim.new(0, self:S(4))
+    listPadding.PaddingBottom = UDim.new(0, self:S(4))
     listPadding.Parent = dropList
-    
-    local selected = {}
-    for _, v in ipairs(default) do table.insert(selected, v) end
-    local isOpen = false
-    local maxHeight = self:S(200)
-    
+
     local function updateText()
         if #selected == 0 then
             dropBtn.Text = "  Selecionar..."
@@ -1861,162 +1934,183 @@ function SpectrumX:CreateMultiDropdown(parent, config)
             dropBtn.Text = "  " .. #selected .. " selecionados"
             dropBtn.TextColor3 = self.Theme.Text
         end
+        countBadge.Text = tostring(#selected)
     end
-    
+
     local function closeDropdown()
         if not isOpen then return end
         isOpen = false
-        self:Tween(dropList, {Size = UDim2.new(0, dropBtn.AbsoluteSize.X, 0, 0)}, 0.2)
+        self:Tween(overlay, {BackgroundTransparency = 1}, 0.2)
+        self:Tween(listContainer, {Size = UDim2.new(0, self:S(320), 0, 0)}, 0.2)
         self:Tween(arrow, {Rotation = 0}, 0.2)
         if dropStroke then
             self:Tween(dropStroke, {Color = self.Theme.Border, Transparency = 0.4}, 0.2)
         end
         task.wait(0.2)
-        if dropList and dropList.Parent then
-            dropList.Visible = false
-        end
+        overlay.Visible = false
+        listContainer.Visible = false
     end
-    
-    self:_RegisterDropdown(dropList, dropBtn, closeDropdown)
-    
-    local function getPriority(name)
-        for i, v in ipairs(selected) do
-            if v == name then return i end
+
+    local function isSelected(name)
+        for _, v in ipairs(selected) do
+            if v == name then return true end
         end
-        return nil
+        return false
     end
-    
+
     local function toggle(name)
         for i, v in ipairs(selected) do
             if v == name then
                 table.remove(selected, i)
-                return
+                return false
             end
         end
         table.insert(selected, name)
+        return true
     end
-    
+
     local function populate()
         for _, child in ipairs(dropList:GetChildren()) do
             if child:IsA("Frame") then child:Destroy() end
         end
-        
+
         for _, option in ipairs(options) do
-            local priority = getPriority(option)
-            local isSelected = priority ~= nil
-            
+            local sel = isSelected(option)
+
             local row = Instance.new("Frame")
-            row.BackgroundColor3 = isSelected and Color3.fromRGB(40, 10, 10) or self.Theme.Input
-            row.Size = UDim2.new(1, 0, 0, self:S(30))
-            row.ZIndex = 101
+            row.BackgroundColor3 = sel and self.Theme.AccentDark or self.Theme.Input
+            row.Size = UDim2.new(1, 0, 0, self:S(38))
+            row.ZIndex = 503
             row.Parent = dropList
-            self:CreateCorner(row, UDim.new(0, 5))
-            
-            if isSelected then
-                self:CreateStroke(row, self.Theme.Accent, 1, 0.2)
-                
-                -- Badge com número
-                local badge = Instance.new("TextLabel")
-                badge.BackgroundColor3 = self.Theme.Accent
-                badge.Position = UDim2.new(0, self:S(6), 0.5, -self:S(9))
-                badge.Size = UDim2.new(0, self:S(18), 0, self:S(18))
-                badge.Font = Enum.Font.GothamBold
-                badge.Text = tostring(priority)
-                badge.TextColor3 = Color3.new(1, 1, 1)
-                badge.TextSize = self:S(10)
-                badge.ZIndex = 102
-                badge.Parent = row
-                self:CreateCorner(badge, UDim.new(1, 0))
+            self:CreateCorner(row, UDim.new(0, 8))
+
+            -- Checkbox visual
+            local cbSize = self:S(18)
+            local checkbox = Instance.new("Frame")
+            checkbox.Name = "Checkbox"
+            checkbox.BackgroundColor3 = sel and self.Theme.Accent or self.Theme.Border
+            checkbox.Position = UDim2.new(0, self:S(10), 0.5, -cbSize/2)
+            checkbox.Size = UDim2.new(0, cbSize, 0, cbSize)
+            checkbox.ZIndex = 504
+            checkbox.Parent = row
+            self:CreateCorner(checkbox, UDim.new(0, 4))
+
+            if sel then
+                local check = Instance.new("TextLabel")
+                check.BackgroundTransparency = 1
+                check.Size = UDim2.new(1, 0, 1, 0)
+                check.Font = Enum.Font.GothamBold
+                check.Text = "✓"
+                check.TextColor3 = Color3.new(1, 1, 1)
+                check.TextSize = self:S(12)
+                check.ZIndex = 505
+                check.Parent = checkbox
             end
-            
+
             local rowBtn = Instance.new("TextButton")
             rowBtn.BackgroundTransparency = 1
             rowBtn.Size = UDim2.new(1, 0, 1, 0)
             rowBtn.Font = Enum.Font.GothamSemibold
-            rowBtn.Text = (isSelected and "      " or "  ") .. option
-            rowBtn.TextColor3 = isSelected and self.Theme.AccentSecondary or self.Theme.TextSecondary
+            rowBtn.Text = "      " .. option
+            rowBtn.TextColor3 = sel and self.Theme.AccentSecondary or self.Theme.Text
             rowBtn.TextSize = self:S(12)
             rowBtn.TextXAlignment = Enum.TextXAlignment.Left
-            rowBtn.ZIndex = 102
+            rowBtn.ZIndex = 504
             rowBtn.Parent = row
-            
+
             local rowPad = Instance.new("UIPadding")
             rowPad.PaddingLeft = UDim.new(0, self:S(12))
             rowPad.Parent = rowBtn
-            
+
             rowBtn.MouseButton1Click:Connect(function()
-                toggle(option)
+                local nowSel = toggle(option)
                 callback(selected)
                 updateText()
                 populate()
             end)
-            
+
             rowBtn.MouseEnter:Connect(function()
-                if not isSelected then
+                if not sel then
                     self:Tween(row, {BackgroundColor3 = self.Theme.CardHover}, 0.1)
                 end
             end)
-            
+
             rowBtn.MouseLeave:Connect(function()
-                if not isSelected then
+                if not sel then
                     self:Tween(row, {BackgroundColor3 = self.Theme.Input}, 0.1)
                 end
             end)
         end
     end
-    
+
     dropBtn.MouseEnter:Connect(function()
         self:Tween(dropBtn, {BackgroundColor3 = self.Theme.InputHover}, 0.15)
     end)
-    
+
     dropBtn.MouseLeave:Connect(function()
         self:Tween(dropBtn, {BackgroundColor3 = self.Theme.Input}, 0.15)
     end)
-    
+
     dropBtn.MouseButton1Click:Connect(function()
         if isOpen then
             closeDropdown()
             return
         end
-        
-        for _, dd in ipairs(self.Dropdowns) do
-            if dd ~= dropList then dd.Visible = false end
-        end
-        
+
         populate()
-        local pos, targetH, contentH = getDropdownPosition(dropBtn, listLayout, maxHeight)
-        dropList.Position = pos
-        dropList.Size = UDim2.new(0, dropBtn.AbsoluteSize.X, 0, 0)
-        dropList.CanvasSize = UDim2.new(0, 0, 0, contentH)
-        dropList.Visible = true
-        
-        self:Tween(dropList, {Size = UDim2.new(0, dropBtn.AbsoluteSize.X, 0, targetH)}, 0.25,
-            Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+        local contentHeight = listLayout.AbsoluteContentSize.Y + self:S(64)
+        local targetHeight = math.min(contentHeight, self:S(360))
+        local targetWidth = self:S(320)
+
+        overlay.Visible = true
+        listContainer.Visible = true
+        overlay.BackgroundTransparency = 1
+        listContainer.Size = UDim2.new(0, targetWidth, 0, 0)
+
+        self:Tween(overlay, {BackgroundTransparency = 0.45}, 0.25)
+        self:Tween(listContainer, {Size = UDim2.new(0, targetWidth, 0, targetHeight)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
         self:Tween(arrow, {Rotation = 180}, 0.2)
         if dropStroke then
             self:Tween(dropStroke, {Color = self.Theme.Accent, Transparency = 0.2}, 0.2)
         end
+
+        dropList.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + self:S(16))
         isOpen = true
     end)
-    
+
+    overlay.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            local pos = input.Position
+            local listPos = listContainer.AbsolutePosition
+            local listSize = listContainer.AbsoluteSize
+            local inList = pos.X >= listPos.X and pos.X <= listPos.X + listSize.X and
+                          pos.Y >= listPos.Y and pos.Y <= listPos.Y + listSize.Y
+            if not inList then
+                closeDropdown()
+            end
+        end
+    end)
+
     updateText()
-    
+
     return {
         Frame = frame,
         GetValues = function() return selected end,
         SetValues = function(v)
-            selected = v
+            selected = {}
+            for _, val in ipairs(v) do
+                table.insert(selected, val)
+            end
             updateText()
         end,
         SetOptions = function(newOptions)
             options = newOptions
-            if isOpen then populate() end
         end,
     }
 end
-
--- ─── CREATE CHECKBOX ──────────────────────────────────────────────────────────
-function SpectrumX:CreateCheckbox(parent, config)
+function GenesisX:CreateCheckbox(parent, config)
     config = config or {}
     local text = config.Text or "Checkbox"
     local default = config.Default or false
@@ -2102,7 +2196,183 @@ end
 
 -- ─── CREATE LABEL ─────────────────────────────────────────────────────────────
 -- CORREÇÃO PRINCIPAL: Agora suporta quebra de linha automática!
-function SpectrumX:CreateLabel(parent, config)
+function GenesisX:CreateLabelToggleSubTitle(parent, config)
+    config = config or {}
+    local titleText = config.Title or "Title"
+    local subtitles = config.Subtitles or {}
+    local buttons = config.Buttons or {}
+    local titleColor = config.TitleColor or self.Theme.Accent
+
+    -- Altura base + espaço para subtítulos e botões
+    local subtitleCount = #subtitles
+    local buttonCount = #buttons
+    local baseHeight = self:S(46)  -- título + padding
+    local extraHeight = (subtitleCount * self:S(18)) + (buttonCount * self:S(34)) + self:S(16)
+    local totalHeight = baseHeight + extraHeight
+
+    local frame = Instance.new("Frame")
+    frame.Name = "LabelToggleSubTitle_" .. titleText
+    frame.BackgroundColor3 = self.Theme.Card
+    frame.Size = UDim2.new(1, 0, 0, totalHeight)
+    frame.ZIndex = 12
+    frame.Parent = parent
+    self:CreateCorner(frame)
+    self:CreateStroke(frame, self.Theme.Border, 1, 0.4)
+
+    -- Título principal
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "Title"
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Position = UDim2.new(0, self:S(14), 0, self:S(10))
+    titleLabel.Size = UDim2.new(1, -self:S(28), 0, self:S(20))
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Text = titleText
+    titleLabel.TextColor3 = titleColor
+    titleLabel.TextSize = self:S(13)
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ZIndex = 13
+    titleLabel.Parent = frame
+
+    -- Container para subtítulos e botões
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Name = "Content"
+    contentFrame.BackgroundTransparency = 1
+    contentFrame.Position = UDim2.new(0, self:S(14), 0, self:S(32))
+    contentFrame.Size = UDim2.new(1, -self:S(28), 1, -self:S(40))
+    contentFrame.ZIndex = 13
+    contentFrame.Parent = frame
+
+    local contentLayout = Instance.new("UIListLayout")
+    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    contentLayout.Padding = UDim.new(0, self:S(6))
+    contentLayout.Parent = contentFrame
+
+    -- Criar subtítulos
+    for i, subText in ipairs(subtitles) do
+        local subLabel = Instance.new("TextLabel")
+        subLabel.Name = "Subtitle_" .. i
+        subLabel.BackgroundTransparency = 1
+        subLabel.Size = UDim2.new(1, 0, 0, self:S(16))
+        subLabel.Font = Enum.Font.Gotham
+        subLabel.Text = subText
+        subLabel.TextColor3 = self.Theme.TextSecondary
+        subLabel.TextSize = self:S(11)
+        subLabel.TextXAlignment = Enum.TextXAlignment.Left
+        subLabel.ZIndex = 14
+        subLabel.Parent = contentFrame
+    end
+
+    -- Criar botões
+    local buttonObjects = {}
+    for i, btnConfig in ipairs(buttons) do
+        local btnText = btnConfig.Text or "Button"
+        local btnCallback = btnConfig.Callback or function() end
+        local btnStyle = btnConfig.Style or "default"
+
+        local btnFrame = Instance.new("Frame")
+        btnFrame.Name = "ButtonFrame_" .. i
+        btnFrame.BackgroundTransparency = 1
+        btnFrame.Size = UDim2.new(1, 0, 0, self:S(32))
+        btnFrame.ZIndex = 14
+        btnFrame.Parent = contentFrame
+
+        local btn = Instance.new("TextButton")
+        btn.Name = "Button"
+        btn.AutoButtonColor = false
+        btn.Size = UDim2.new(1, 0, 1, 0)
+        btn.Font = Enum.Font.GothamBold
+        btn.Text = btnText
+        btn.TextSize = self:S(12)
+        btn.ZIndex = 15
+        btn.Parent = btnFrame
+        self:CreateCorner(btn, UDim.new(0, 6))
+
+        local color, textColor
+        if btnStyle == "accent" then
+            btn.BackgroundColor3 = self.Theme.Accent
+            textColor = Color3.new(1, 1, 1)
+            color = self.Theme.Accent
+        elseif btnStyle == "danger" then
+            btn.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
+            textColor = self.Theme.Error
+            color = self.Theme.Error
+        elseif btnStyle == "warning" then
+            btn.BackgroundColor3 = Color3.fromRGB(30, 20, 10)
+            textColor = self.Theme.Warning
+            color = self.Theme.Warning
+        elseif btnStyle == "info" then
+            btn.BackgroundColor3 = Color3.fromRGB(20, 15, 30)
+            textColor = self.Theme.Info
+            color = self.Theme.Info
+        else
+            btn.BackgroundColor3 = self.Theme.Input
+            textColor = self.Theme.Text
+            color = self.Theme.Border
+        end
+
+        btn.TextColor3 = textColor
+
+        local stroke = self:CreateStroke(btn, color, 1, btnStyle == "accent" and 1 or 0.4)
+
+        if btnStyle == "accent" then
+            self:CreateGradient(btn, self.Theme.Accent, self.Theme.AccentDark, 90)
+        end
+
+        -- Ripple holder
+        local rippleHolder = Instance.new("Frame")
+        rippleHolder.Name = "RippleHolder"
+        rippleHolder.BackgroundTransparency = 1
+        rippleHolder.BorderSizePixel = 0
+        rippleHolder.Size = UDim2.new(1, 0, 1, 0)
+        rippleHolder.ClipsDescendants = true
+        rippleHolder.ZIndex = btn.ZIndex + 1
+        rippleHolder.Parent = btn
+        self:CreateCorner(rippleHolder, UDim.new(0, 6))
+
+        -- Hover
+        btn.MouseEnter:Connect(function()
+            if btnStyle == "accent" then
+                self:Tween(btn, {BackgroundColor3 = self.Theme.AccentHover}, 0.15)
+            else
+                self:Tween(btn, {BackgroundColor3 = self.Theme.InputHover}, 0.15)
+                if stroke then
+                    self:Tween(stroke, {Transparency = 0.1}, 0.15)
+                end
+            end
+        end)
+
+        btn.MouseLeave:Connect(function()
+            if btnStyle == "accent" then
+                self:Tween(btn, {BackgroundColor3 = self.Theme.Accent}, 0.15)
+            else
+                self:Tween(btn, {BackgroundColor3 = self.Theme.Input}, 0.15)
+                if stroke then
+                    self:Tween(stroke, {Transparency = 0.4}, 0.15)
+                end
+            end
+        end)
+
+        btn.MouseButton1Click:Connect(function()
+            self:CreateRipple(btn, UserInputService:GetMouseLocation())
+            btnCallback()
+        end)
+
+        table.insert(buttonObjects, {
+            Button = btn,
+            SetText = function(t) btn.Text = t end,
+            SetCallback = function(cb) btnCallback = cb end,
+        })
+    end
+
+    return {
+        Frame = frame,
+        Title = titleLabel,
+        SetTitle = function(t) titleLabel.Text = t end,
+        SetTitleColor = function(c) titleLabel.TextColor3 = c end,
+        Buttons = buttonObjects,
+    }
+end
+function GenesisX:CreateLabel(parent, config)
     config = config or {}
     local text = config.Text or "Label"
     local color = config.Color or self.Theme.TextSecondary
@@ -2175,7 +2445,7 @@ function SpectrumX:CreateLabel(parent, config)
 end
 
 -- ─── CREATE SEPARATOR ─────────────────────────────────────────────────────────
-function SpectrumX:CreateSeparator(parent)
+function GenesisX:CreateSeparator(parent)
     local wrap = Instance.new("Frame")
     wrap.Name = "Separator"
     wrap.BackgroundTransparency = 1
@@ -2198,7 +2468,7 @@ function SpectrumX:CreateSeparator(parent)
 end
 
 -- ─── CREATE STATUS CARD ───────────────────────────────────────────────────────
-function SpectrumX:CreateStatusCard(parent, config)
+function GenesisX:CreateStatusCard(parent, config)
     config = config or {}
     local title = config.Title or "Status"
     
@@ -2359,7 +2629,7 @@ end
 
 -- ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
 -- CORREÇÃO: Notificações sem bugs de sobreposição e com visual profissional
-function SpectrumX:Notify(config)
+function GenesisX:Notify(config)
     config = config or {}
     local text = config.Text or "Notificação"
     local ntype = config.Type or "info"
@@ -2567,19 +2837,19 @@ function SpectrumX:Notify(config)
 end
 
 -- ─── DESTROY ──────────────────────────────────────────────────────────────────
-function SpectrumX:Destroy()
+function GenesisX:Destroy()
     if self.ScreenGui then
         self.ScreenGui:Destroy()
     end
 end
 
 -- ─── GET WINDOW ───────────────────────────────────────────────────────────────
-function SpectrumX:GetWindow()
+function GenesisX:GetWindow()
     return self.MainFrame
 end
 
 -- ─── SET VISIBLE ──────────────────────────────────────────────────────────────
-function SpectrumX:SetVisible(visible)
+function GenesisX:SetVisible(visible)
     if self.MainFrame then
         self.MainFrame.Visible = visible
     end
@@ -2590,28 +2860,28 @@ function SpectrumX:SetVisible(visible)
 end
 
 -- ─── TOGGLE VISIBILITY ────────────────────────────────────────────────────────
-function SpectrumX:Toggle()
+function GenesisX:Toggle()
     if self.MainFrame then
         self:SetVisible(not self.MainFrame.Visible)
     end
 end
 
 -- ─── SET POSITION ─────────────────────────────────────────────────────────────
-function SpectrumX:SetPosition(position)
+function GenesisX:SetPosition(position)
     if self.MainFrame then
         self.MainFrame.Position = position
     end
 end
 
 -- ─── SET SIZE ─────────────────────────────────────────────────────────────────
-function SpectrumX:SetSize(size)
+function GenesisX:SetSize(size)
     if self.MainFrame then
         self.MainFrame.Size = size
     end
 end
 
 -- ─── UPDATE THEME ─────────────────────────────────────────────────────────────
-function SpectrumX:SetTheme(newTheme)
+function GenesisX:SetTheme(newTheme)
     for key, value in pairs(newTheme) do
         if self.Theme[key] then
             self.Theme[key] = value
@@ -2620,4 +2890,4 @@ function SpectrumX:SetTheme(newTheme)
 end
 
 -- Retornar a biblioteca
-return SpectrumX
+return GenesisX
