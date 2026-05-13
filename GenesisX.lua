@@ -1078,8 +1078,8 @@ function GenesisX:CreateToggle(parent, config)
     
     return {
         Frame = frame,
-        GetState = function(self) return state end,
-        SetState = function(self, s) state = s; callback(state); update(state) end,
+        GetState = function() return state end,
+        SetState = function(s) state = s; callback(state); update(state) end,
     }
 end
 
@@ -1184,8 +1184,8 @@ function GenesisX:CreateButton(parent, config)
     return {
         Frame = frame,
         Button = btn,
-        SetText = function(self, t) btn.Text = t end,
-        SetCallback = function(self, cb) callback = cb end,
+        SetText = function(t) btn.Text = t end,
+        SetCallback = function(cb) callback = cb end,
     }
 end
 
@@ -1255,8 +1255,8 @@ function GenesisX:CreateInput(parent, config)
     return {
         Frame = frame,
         TextBox = textBox,
-        GetText = function(self) return textBox.Text end,
-        SetText = function(self, t) textBox.Text = t end,
+        GetText = function() return textBox.Text end,
+        SetText = function(t) textBox.Text = t end,
     }
 end
 
@@ -1333,8 +1333,8 @@ function GenesisX:CreateNumberInput(parent, config)
     return {
         Frame = frame,
         TextBox = textBox,
-        GetValue = function(self) return tonumber(textBox.Text) end,
-        SetValue = function(self, v)
+        GetValue = function() return tonumber(textBox.Text) end,
+        SetValue = function(v)
             v = math.clamp(v, min, max)
             textBox.Text = tostring(v)
         end,
@@ -1479,8 +1479,8 @@ function GenesisX:CreateSlider(parent, config)
     
     return {
         Frame = frame,
-        GetValue = function(self) return currentValue end,
-        SetValue = function(self, v)
+        GetValue = function() return currentValue end,
+        SetValue = function(v)
             v = math.clamp(v, min, max)
             currentValue = v
             local percent = (v - min) / (max - min)
@@ -1769,8 +1769,8 @@ function GenesisX:CreateDropdown(parent, config)
 
     return {
         Frame = frame,
-        GetValue = function(self) return selected end,
-        SetValue = function(self, v)
+        GetValue = function() return selected end,
+        SetValue = function(v)
             selected = v
             dropBtn.Text = "  " .. (v or "Selecionar...")
             dropBtn.TextColor3 = v and self.Theme.Text or self.Theme.TextMuted
@@ -2023,7 +2023,7 @@ function GenesisX:CreateMultiDropdown(parent, config)
             rowPad.Parent = rowBtn
 
             rowBtn.MouseButton1Click:Connect(function()
-                local nowSel = toggle(option)
+                toggle(option)
                 callback(selected)
                 updateText()
                 populate()
@@ -2097,8 +2097,8 @@ function GenesisX:CreateMultiDropdown(parent, config)
 
     return {
         Frame = frame,
-        GetValues = function(self) return selected end,
-        SetValues = function(self, v)
+        GetValues = function() return selected end,
+        SetValues = function(v)
             selected = {}
             for _, val in ipairs(v) do
                 table.insert(selected, val)
@@ -2184,11 +2184,11 @@ function GenesisX:CreateCheckbox(parent, config)
     
     return {
         Frame = frame,
-        GetState = function(self) return state end,
-        SetState = function(self, s)
+        GetState = function() return state end,
+        SetState = function(s)
             state = s
             callback(state)
-            GenesisX:Tween(checkbox, {BackgroundColor3 = state and self.Theme.Accent or self.Theme.Input}, 0.2)
+            self:Tween(checkbox, {BackgroundColor3 = state and self.Theme.Accent or self.Theme.Input}, 0.2)
             checkbox.Text = state and "✓" or ""
         end,
     }
@@ -2196,6 +2196,79 @@ end
 
 -- ─── CREATE LABEL ─────────────────────────────────────────────────────────────
 -- CORREÇÃO PRINCIPAL: Agora suporta quebra de linha automática!
+function GenesisX:CreateLabel(parent, config)
+    config = config or {}
+    local text = config.Text or "Label"
+    local color = config.Color or self.Theme.TextSecondary
+    local autoSize = config.AutoSize ~= false -- Default true
+    local wrapped = config.Wrapped ~= false -- Default true (CORREÇÃO!)
+    
+    -- Calcular altura baseada no texto
+    local minHeight = self:S(36)
+    local padding = self:S(20)
+    
+    local frame = Instance.new("Frame")
+    frame.Name = "Label_" .. text:sub(1, 10)
+    frame.BackgroundColor3 = self.Theme.Card
+    frame.Size = UDim2.new(1, 0, 0, minHeight)
+    frame.ZIndex = 12
+    frame.Parent = parent
+    self:CreateCorner(frame)
+    self:CreateStroke(frame, self.Theme.Border, 1, 0.4)
+    
+    -- Label com quebra de linha automática
+    local label = Instance.new("TextLabel")
+    label.Name = "Text"
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0, self:S(14), 0, 0)
+    label.Size = UDim2.new(1, -self:S(28), 1, 0)
+    label.Font = Enum.Font.GothamSemibold
+    label.Text = text
+    label.TextColor3 = color
+    label.TextSize = self:S(12)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    
+    -- CORREÇÃO: Quebra de linha automática!
+    label.TextWrapped = wrapped
+    
+    -- CORREÇÃO: Ajuste automático de tamanho
+    if autoSize then
+        label.AutomaticSize = Enum.AutomaticSize.Y
+    end
+    
+    label.ZIndex = 13
+    label.Parent = frame
+    
+    -- Ajustar altura do frame quando o texto mudar
+    if autoSize then
+        label:GetPropertyChangedSignal("TextBounds"):Connect(function()
+            local newHeight = math.max(minHeight, label.TextBounds.Y + padding)
+            frame.Size = UDim2.new(1, 0, 0, newHeight)
+        end)
+        
+        -- Ajuste inicial
+        task.delay(0.1, function()
+            if label and label.Parent then
+                local newHeight = math.max(minHeight, label.TextBounds.Y + padding)
+                frame.Size = UDim2.new(1, 0, 0, newHeight)
+            end
+        end)
+    end
+    
+    return {
+        Frame = frame,
+        Label = label,
+        SetText = function(t)
+            label.Text = t
+        end,
+        SetColor = function(c)
+            label.TextColor3 = c
+        end,
+    }
+end
+
+-- ─── CREATE SEPARATOR ─────────────────────────────────────────────────────────
 function GenesisX:CreateLabelToggleSubTitle(parent, config)
     config = config or {}
     local titleText = config.Title or "Title"
@@ -2206,7 +2279,7 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
     -- Altura base + espaço para subtítulos e botões
     local subtitleCount = #subtitles
     local buttonCount = #buttons
-    local baseHeight = self:S(46)  -- título + padding
+    local baseHeight = self:S(46)
     local extraHeight = (subtitleCount * self:S(18)) + (buttonCount * self:S(34)) + self:S(16)
     local totalHeight = baseHeight + extraHeight
 
@@ -2359,92 +2432,19 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
 
         table.insert(buttonObjects, {
             Button = btn,
-            SetText = function(self, t) btn.Text = t end,
-            SetCallback = function(self, cb) btnCallback = cb end,
+            SetText = function(t) btn.Text = t end,
+            SetCallback = function(cb) btnCallback = cb end,
         })
     end
 
     return {
         Frame = frame,
         Title = titleLabel,
-        SetTitle = function(self, t) titleLabel.Text = t end,
-        SetTitleColor = function(self, c) titleLabel.TextColor3 = c end,
+        SetTitle = function(t) titleLabel.Text = t end,
+        SetTitleColor = function(c) titleLabel.TextColor3 = c end,
         Buttons = buttonObjects,
     }
 end
-function GenesisX:CreateLabel(parent, config)
-    config = config or {}
-    local text = config.Text or "Label"
-    local color = config.Color or self.Theme.TextSecondary
-    local autoSize = config.AutoSize ~= false -- Default true
-    local wrapped = config.Wrapped ~= false -- Default true (CORREÇÃO!)
-    
-    -- Calcular altura baseada no texto
-    local minHeight = self:S(36)
-    local padding = self:S(20)
-    
-    local frame = Instance.new("Frame")
-    frame.Name = "Label_" .. text:sub(1, 10)
-    frame.BackgroundColor3 = self.Theme.Card
-    frame.Size = UDim2.new(1, 0, 0, minHeight)
-    frame.ZIndex = 12
-    frame.Parent = parent
-    self:CreateCorner(frame)
-    self:CreateStroke(frame, self.Theme.Border, 1, 0.4)
-    
-    -- Label com quebra de linha automática
-    local label = Instance.new("TextLabel")
-    label.Name = "Text"
-    label.BackgroundTransparency = 1
-    label.Position = UDim2.new(0, self:S(14), 0, 0)
-    label.Size = UDim2.new(1, -self:S(28), 1, 0)
-    label.Font = Enum.Font.GothamSemibold
-    label.Text = text
-    label.TextColor3 = color
-    label.TextSize = self:S(12)
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.TextYAlignment = Enum.TextYAlignment.Center
-    
-    -- CORREÇÃO: Quebra de linha automática!
-    label.TextWrapped = wrapped
-    
-    -- CORREÇÃO: Ajuste automático de tamanho
-    if autoSize then
-        label.AutomaticSize = Enum.AutomaticSize.Y
-    end
-    
-    label.ZIndex = 13
-    label.Parent = frame
-    
-    -- Ajustar altura do frame quando o texto mudar
-    if autoSize then
-        label:GetPropertyChangedSignal("TextBounds"):Connect(function()
-            local newHeight = math.max(minHeight, label.TextBounds.Y + padding)
-            frame.Size = UDim2.new(1, 0, 0, newHeight)
-        end)
-        
-        -- Ajuste inicial
-        task.delay(0.1, function()
-            if label and label.Parent then
-                local newHeight = math.max(minHeight, label.TextBounds.Y + padding)
-                frame.Size = UDim2.new(1, 0, 0, newHeight)
-            end
-        end)
-    end
-    
-    return {
-        Frame = frame,
-        Label = label,
-        SetText = function(self, t)
-            label.Text = t
-        end,
-        SetColor = function(self, c)
-            label.TextColor3 = c
-        end,
-    }
-end
-
--- ─── CREATE SEPARATOR ─────────────────────────────────────────────────────────
 function GenesisX:CreateSeparator(parent)
     local wrap = Instance.new("Frame")
     wrap.Name = "Separator"
@@ -2598,26 +2598,17 @@ function GenesisX:CreateStatusCard(parent, config)
     
     return {
         Frame = frame,
-        SetStatus = function(self, maybe_color_or_status, maybe_color)
-            local status, color
-            if type(self_or_status) == "table" then
-                status = maybe_color_or_status
-                color = maybe_color
-            else
-                status = self_or_status
-                color = maybe_color_or_status
-            end
-            statusLabel.Text = "● " .. tostring(status)
+        SetStatus = function(status, color)
+            statusLabel.Text = "● " .. status
             statusLabel.TextColor3 = color or self.Theme.TextMuted
         end,
-        SetInfo = function(self, maybe_info)
-            local info = type(self_or_info) == "table" and maybe_info or self_or_info
-            infoLabel.Text = tostring(info)
+        SetInfo = function(info)
+            infoLabel.Text = info
         end,
-        SetProgress = function(self, percent)
+        SetProgress = function(percent)
             bar.Size = UDim2.new(math.clamp(percent, 0, 1), 0, 1, 0)
         end,
-        AnimateLoading = function(self, active, duration)
+        AnimateLoading = function(active, duration)
             if active then
                 spawn(function()
                     while active and frame and frame.Parent do
