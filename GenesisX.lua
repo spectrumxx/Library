@@ -422,22 +422,20 @@ function GenesisX:CreateWindow(config)
     
     -- Ícone do header
     local iconX = self:S(16)
-    local headerIconAsset = config.IconAssetId and self:IsAssetId(config.IconAssetId) and config.IconAssetId
-    if not headerIconAsset and config.Icon and self:IsAssetId(config.Icon) then
-        headerIconAsset = config.Icon
-    end
-
-    if headerIconAsset then
-        local assetId = self:FormatAssetId(headerIconAsset)
+    local hasIconAsset = config.IconAssetId and self:IsAssetId(config.IconAssetId)
+    
+    if hasIconAsset then
+        local assetId = self:FormatAssetId(config.IconAssetId)
         local iconImg = Instance.new("ImageLabel")
         iconImg.Name = "HeaderIcon"
         iconImg.BackgroundTransparency = 1
         iconImg.Position = UDim2.new(0, iconX, 0.5, -self:S(16))
         iconImg.Size = UDim2.new(0, self:S(32), 0, self:S(32))
         iconImg.Image = assetId
-        iconImg.ScaleType = Enum.ScaleType.Stretch
+        iconImg.ScaleType = Enum.ScaleType.Stretch  -- Cobre todo o espaço
         iconImg.ZIndex = 14
-        iconImg.Parent = self.Headerelse
+        iconImg.Parent = self.Header
+    else
         -- Ícone padrão (letra)
         local iconBg = Instance.new("Frame")
         iconBg.Name = "IconBg"
@@ -1576,7 +1574,7 @@ function GenesisX:CreateDropdown(parent, config)
     local selected = default
     local isOpen = false
 
-    -- Overlay escurecido (fundo)
+    -- Overlay escurecido
     local overlay = Instance.new("Frame")
     overlay.Name = "DropdownOverlay"
     overlay.BackgroundColor3 = Color3.new(0, 0, 0)
@@ -1587,7 +1585,7 @@ function GenesisX:CreateDropdown(parent, config)
     overlay.Visible = false
     overlay.Parent = self.ScreenGui
 
-    -- Container da lista (centralizado, grande)
+    -- Container da lista
     local listContainer = Instance.new("Frame")
     listContainer.Name = "ListContainer"
     listContainer.BackgroundColor3 = self.Theme.Card
@@ -1601,7 +1599,7 @@ function GenesisX:CreateDropdown(parent, config)
     self:CreateCorner(listContainer, UDim.new(0, 12))
     self:CreateStroke(listContainer, self.Theme.Accent, 1.5, 0.3)
 
-    -- Título do dropdown no container
+    -- Título
     local listTitle = Instance.new("TextLabel")
     listTitle.Name = "Title"
     listTitle.BackgroundTransparency = 1
@@ -1615,7 +1613,7 @@ function GenesisX:CreateDropdown(parent, config)
     listTitle.ZIndex = 502
     listTitle.Parent = listContainer
 
-    -- ScrollingFrame da lista
+    -- ScrollingFrame
     local dropList = Instance.new("ScrollingFrame")
     dropList.Name = "DropList"
     dropList.BackgroundTransparency = 1
@@ -1843,14 +1841,14 @@ function GenesisX:CreateMultiDropdown(parent, config)
     arrow.ZIndex = 15
     arrow.Parent = dropBtn
 
-    -- Estado LOCAL (não compartilhado entre instâncias)
+    -- Estado LOCAL
     local selected = {}
     for _, v in ipairs(default) do
         table.insert(selected, v)
     end
     local isOpen = false
 
-    -- Overlay escurecido
+    -- Overlay
     local overlay = Instance.new("Frame")
     overlay.Name = "MultiDropdownOverlay"
     overlay.BackgroundColor3 = Color3.new(0, 0, 0)
@@ -1861,7 +1859,7 @@ function GenesisX:CreateMultiDropdown(parent, config)
     overlay.Visible = false
     overlay.Parent = self.ScreenGui
 
-    -- Container da lista
+    -- Container
     local listContainer = Instance.new("Frame")
     listContainer.Name = "ListContainer"
     listContainer.BackgroundColor3 = self.Theme.Card
@@ -1986,7 +1984,6 @@ function GenesisX:CreateMultiDropdown(parent, config)
             row.Parent = dropList
             self:CreateCorner(row, UDim.new(0, 8))
 
-            -- Checkbox visual
             local cbSize = self:S(18)
             local checkbox = Instance.new("Frame")
             checkbox.Name = "Checkbox"
@@ -2278,7 +2275,6 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
     local buttons = config.Buttons or {}
     local titleColor = config.TitleColor or self.Theme.Accent
 
-    -- Altura base + espaço para subtítulos e botões
     local subtitleCount = #subtitles
     local buttonCount = #buttons
     local baseHeight = self:S(46)
@@ -2294,7 +2290,6 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
     self:CreateCorner(frame)
     self:CreateStroke(frame, self.Theme.Border, 1, 0.4)
 
-    -- Título principal
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Name = "Title"
     titleLabel.BackgroundTransparency = 1
@@ -2308,7 +2303,6 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
     titleLabel.ZIndex = 13
     titleLabel.Parent = frame
 
-    -- Container para subtítulos e botões
     local contentFrame = Instance.new("Frame")
     contentFrame.Name = "Content"
     contentFrame.BackgroundTransparency = 1
@@ -2322,7 +2316,6 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
     contentLayout.Padding = UDim.new(0, self:S(6))
     contentLayout.Parent = contentFrame
 
-    -- Criar subtítulos
     for i, subText in ipairs(subtitles) do
         local subLabel = Instance.new("TextLabel")
         subLabel.Name = "Subtitle_" .. i
@@ -2337,7 +2330,6 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
         subLabel.Parent = contentFrame
     end
 
-    -- Criar botões
     local buttonObjects = {}
     for i, btnConfig in ipairs(buttons) do
         local btnText = btnConfig.Text or "Button"
@@ -2368,7 +2360,7 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
             textColor = Color3.new(1, 1, 1)
             color = self.Theme.Accent
         elseif btnStyle == "danger" then
-            btn.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
+            btn.BackgroundColor3 = Color3.fromRGB(30, 15, 40)
             textColor = self.Theme.Error
             color = self.Theme.Error
         elseif btnStyle == "warning" then
@@ -2393,7 +2385,6 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
             self:CreateGradient(btn, self.Theme.Accent, self.Theme.AccentDark, 90)
         end
 
-        -- Ripple holder
         local rippleHolder = Instance.new("Frame")
         rippleHolder.Name = "RippleHolder"
         rippleHolder.BackgroundTransparency = 1
@@ -2404,7 +2395,6 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
         rippleHolder.Parent = btn
         self:CreateCorner(rippleHolder, UDim.new(0, 6))
 
-        -- Hover
         btn.MouseEnter:Connect(function()
             if btnStyle == "accent" then
                 self:Tween(btn, {BackgroundColor3 = self.Theme.AccentHover}, 0.15)
@@ -2420,7 +2410,7 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
             if btnStyle == "accent" then
                 self:Tween(btn, {BackgroundColor3 = self.Theme.Accent}, 0.15)
             else
-                self:Tween(btn, {BackgroundColor3 = self.Theme.Input}, 0.15)
+                self:Tween(btn, {BackgroundColor3 = btnStyle == "danger" and Color3.fromRGB(30, 15, 40) or (btnStyle == "warning" and Color3.fromRGB(30, 20, 10) or (btnStyle == "info" and Color3.fromRGB(20, 15, 30) or self.Theme.Input))}, 0.15)
                 if stroke then
                     self:Tween(stroke, {Transparency = 0.4}, 0.15)
                 end
@@ -2636,12 +2626,12 @@ function GenesisX:Notify(config)
     local text = config.Text or "Notificação"
     local ntype = config.Type or "info"
     local duration = config.Duration or 4
-
+    
     self:UpdateScale()
-
+    
     local notifWidth = self:S(ScaleData.IsMobile and 300 or 340)
     local notifHeight = self:S(ScaleData.IsMobile and 70 or 76)
-
+    
     -- Cores por tipo
     local color = self.Theme.Info
     if ntype == "success" then
@@ -2651,32 +2641,44 @@ function GenesisX:Notify(config)
     elseif ntype == "error" then
         color = self.Theme.Error
     end
-
+    
     -- Container da notificação
     local notif = Instance.new("Frame")
     notif.Name = "Notification"
     notif.BackgroundColor3 = self.Theme.Card
     notif.BorderSizePixel = 0
     notif.Size = UDim2.new(0, notifWidth, 0, notifHeight)
-    notif.ZIndex = 2000
+    notif.ZIndex = 2000  -- Acima de tudo
     notif.Parent = self.ScreenGui
     self:CreateCorner(notif, UDim.new(0, 10))
-
-    -- Barra lateral colorida (ocupa a altura toda, sem gaps)
+    
+    -- Barra lateral colorida
     local colorBar = Instance.new("Frame")
     colorBar.Name = "ColorBar"
     colorBar.BackgroundColor3 = color
     colorBar.BorderSizePixel = 0
-    colorBar.Size = UDim2.new(0, 4, 1, 0)
-    colorBar.Position = UDim2.new(0, 0, 0, 0)
+    colorBar.Size = UDim2.new(0, 4, 1, -self:S(16))
+    colorBar.Position = UDim2.new(0, 0, 0, self:S(8))
     colorBar.ZIndex = 2002
     colorBar.Parent = notif
-
+    self:CreateCorner(colorBar, UDim.new(1, 0))
+    
+    -- Barra superior decorativa
+    local topBar = Instance.new("Frame")
+    topBar.Name = "TopBar"
+    topBar.BackgroundColor3 = color
+    topBar.BorderSizePixel = 0
+    topBar.Size = UDim2.new(0.35, 0, 0, 2)
+    topBar.Position = UDim2.new(0, 0, 0, 0)
+    topBar.ZIndex = 2002
+    topBar.Parent = notif
+    self:CreateCorner(topBar, UDim.new(1, 0))
+    
     -- Ícone
     local iconText = ntype == "success" and "✓" or 
                      ntype == "warning" and "⚠" or 
                      ntype == "error" and "✕" or "ℹ"
-
+    
     local icon = Instance.new("TextLabel")
     icon.Name = "Icon"
     icon.BackgroundTransparency = 1
@@ -2688,8 +2690,8 @@ function GenesisX:Notify(config)
     icon.TextSize = self:S(20)
     icon.ZIndex = 2002
     icon.Parent = notif
-
-    -- Container de texto
+    
+    -- CORREÇÃO: Texto com padding adequado e sem sobreposição
     local textContainer = Instance.new("Frame")
     textContainer.Name = "TextContainer"
     textContainer.BackgroundTransparency = 1
@@ -2697,7 +2699,7 @@ function GenesisX:Notify(config)
     textContainer.Size = UDim2.new(1, -self:S(65), 1, -self:S(16))
     textContainer.ZIndex = 2002
     textContainer.Parent = notif
-
+    
     local textLabel = Instance.new("TextLabel")
     textLabel.Name = "Text"
     textLabel.BackgroundTransparency = 1
@@ -2706,13 +2708,13 @@ function GenesisX:Notify(config)
     textLabel.Text = text
     textLabel.TextColor3 = self.Theme.Text
     textLabel.TextSize = self:S(12)
-    textLabel.TextWrapped = true
+    textLabel.TextWrapped = true  -- Quebra de linha
     textLabel.TextXAlignment = Enum.TextXAlignment.Left
     textLabel.TextYAlignment = Enum.TextYAlignment.Center
     textLabel.ZIndex = 2003
     textLabel.Parent = textContainer
-
-    -- Barra de progresso (timer) - dentro da notificação, não na borda
+    
+    -- Barra de progresso (timer)
     local progBg = Instance.new("Frame")
     progBg.Name = "ProgressBg"
     progBg.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -2722,12 +2724,8 @@ function GenesisX:Notify(config)
     progBg.ClipsDescendants = true
     progBg.ZIndex = 2002
     progBg.Parent = notif
-
-    -- Corner na barra de progresso para ficar arredondada nas pontas
-    local progCorner = Instance.new("UICorner")
-    progCorner.CornerRadius = UDim.new(1, 0)
-    progCorner.Parent = progBg
-
+    self:CreateCorner(progBg, UDim.new(1, 0))
+    
     local progBar = Instance.new("Frame")
     progBar.Name = "ProgressBar"
     progBar.BackgroundColor3 = color
@@ -2735,8 +2733,8 @@ function GenesisX:Notify(config)
     progBar.BorderSizePixel = 0
     progBar.ZIndex = 2003
     progBar.Parent = progBg
-
-    -- Botão de fechar invisível
+    
+    -- Botão de fechar invisível (clique na notificação)
     local closeBtn = Instance.new("TextButton")
     closeBtn.Name = "CloseBtn"
     closeBtn.BackgroundTransparency = 1
@@ -2744,21 +2742,21 @@ function GenesisX:Notify(config)
     closeBtn.Text = ""
     closeBtn.ZIndex = 2010
     closeBtn.Parent = notif
-
+    
     -- Adicionar à lista de notificações
     table.insert(self._notifications, notif)
-
+    
     -- Função para obter viewport
     local function getViewport()
         local success, camera = pcall(function() return workspace.CurrentCamera end)
         return (success and camera) and camera.ViewportSize or Vector2.new(1366, 768)
     end
-
+    
     -- Reorganizar notificações
     local function restack()
         local viewport = getViewport()
         local offset = self:S(14)
-
+        
         for i = #self._notifications, 1, -1 do
             local n = self._notifications[i]
             if n and n.Parent then
@@ -2770,55 +2768,58 @@ function GenesisX:Notify(config)
             end
         end
     end
-
+    
     -- Fechar notificação
     local dismissed = false
     local function dismiss()
         if dismissed then return end
         dismissed = true
-
+        
+        -- Remover da lista
         for i, n in ipairs(self._notifications) do
             if n == notif then
                 table.remove(self._notifications, i)
                 break
             end
         end
-
+        
+        -- Animação de saída
         local viewport = getViewport()
         self:Tween(notif, {
             Position = UDim2.fromOffset(viewport.X + notifWidth + 50, notif.AbsolutePosition.Y),
             BackgroundTransparency = 1
         }, 0.3)
-
+        
+        -- Também fade out nos filhos
         for _, child in ipairs(notif:GetDescendants()) do
             if child:IsA("GuiObject") and child ~= notif then
                 self:Tween(child, {BackgroundTransparency = 1, TextTransparency = 1, ImageTransparency = 1}, 0.3)
             end
         end
-
+        
         restack()
         task.wait(0.35)
-
+        
         if notif and notif.Parent then
             notif:Destroy()
         end
     end
-
+    
     closeBtn.MouseButton1Click:Connect(dismiss)
-
+    
     -- Animação de entrada
     local viewport = getViewport()
     notif.Position = UDim2.fromOffset(viewport.X + notifWidth + 50, viewport.Y - notifHeight - self:S(14))
-
+    
     self:Tween(notif, {
         Position = UDim2.fromOffset(viewport.X - notifWidth - self:S(16), viewport.Y - notifHeight - self:S(14))
     }, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-
+    
     restack()
-
+    
     -- Animação do timer
     self:Tween(progBar, {Size = UDim2.new(0, 0, 1, 0)}, duration)
-
+    
     -- Auto-fechar
     task.delay(duration, function()
         if not dismissed then
@@ -2826,6 +2827,8 @@ function GenesisX:Notify(config)
         end
     end)
 end
+
+-- ─── DESTROY ──────────────────────────────────────────────────────────────────
 function GenesisX:Destroy()
     if self.ScreenGui then
         self.ScreenGui:Destroy()
