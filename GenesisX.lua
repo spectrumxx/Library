@@ -10,6 +10,18 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+-- ─── ÍCONES LUCIDE / SPECTRUMX ──────────────────────────────────────────────
+local LucideAssets = {}
+pcall(function()
+    local raw = loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/spectrumxx/Library/refs/heads/main/Icons.lua"
+    ))()
+    if raw and raw.assets then
+        LucideAssets = raw.assets
+    end
+end)
+GenesisX.Icons = LucideAssets
+
 -- ─── THEME ────────────────────────────────────────────────────────────────────
 GenesisX.Theme = {
     Background = Color3.fromRGB(8, 8, 8),
@@ -230,13 +242,20 @@ end
 function GenesisX:IsAssetId(value)
     if type(value) ~= "string" and type(value) ~= "number" then return false end
     local s = tostring(value)
-    return s:match("^rbxassetid://") ~= nil or s:match("^%d+$") ~= nil
+    if s:match("^rbxassetid://") ~= nil or s:match("^%d+$") ~= nil then return true end
+    -- Também aceita nomes de ícones registrados
+    if LucideAssets and LucideAssets[s] then return true end
+    return false
 end
 
 function GenesisX:FormatAssetId(value)
     if type(value) == "number" then
         return "rbxassetid://" .. value
     elseif type(value) == "string" then
+        -- Prioridade: nome de ícone Lucide registrado
+        if LucideAssets and LucideAssets[value] then
+            return LucideAssets[value]
+        end
         if value:match("^rbxassetid://") then
             return value
         elseif value:match("^%d+$") then
@@ -355,7 +374,7 @@ function GenesisX:CreateWindow(config)
     self:CreateCorner(self.Header, UDim.new(0, 10))
 
     local iconX = self:S(16)
-    -- FIX: Detectar asset ID corretamente para o ícone do header
+    -- FIX: Detectar asset ID corretamente para o ícone do header (agora inclui nomes Lucide)
     local headerIconAsset = config.IconAssetId and self:FormatAssetId(config.IconAssetId)
                          or (config.Icon and self:FormatAssetId(config.Icon))
 
@@ -546,7 +565,7 @@ function GenesisX:_CreateFloatingButton(config)
     self.FloatBtn.Parent = self.ScreenGui
     self:CreateCorner(self.FloatBtn, UDim.new(0, 14))
 
-    -- FIX: Detectar asset ID para ícone do botão flutuante
+    -- FIX: Detectar asset ID para ícone do botão flutuante (agora suporta nomes Lucide)
     local floatIconRaw = config.FloatIconAssetId or config.FloatIcon or config.IconAssetId or config.Icon or "S"
     local floatIconAsset = self:FormatAssetId(floatIconRaw)
 
@@ -642,12 +661,12 @@ function GenesisX:CreateTab(config)
     tabBtn.Parent = self.Sidebar
     self:CreateCorner(tabBtn, UDim.new(0, 10))
 
-    -- FIX: Detectar corretamente se Icon é asset ID (número puro, rbxassetid://, ou string numérica)
+    -- FIX: Detectar corretamente se Icon é asset ID ou nome Lucide
     local iconRaw = config.Icon or config.IconAssetId
     local iconAssetId = iconRaw and self:FormatAssetId(iconRaw)
 
     if iconAssetId then
-        -- É um asset ID — renderizar como ImageLabel
+        -- É um asset ID ou nome Lucide válido — renderizar como ImageLabel
         local iconImg = Instance.new("ImageLabel")
         iconImg.Name = "Icon"
         iconImg.BackgroundTransparency = 1
@@ -2610,5 +2629,11 @@ function GenesisX:SetTheme(newTheme)
         if self.Theme[key] then self.Theme[key] = value end
     end
 end
+
+-- ─── ALIASES / COMPATIBILIDADE ────────────────────────────────────────────────
+-- Permite usar GenesisX:Notify, SpectrumX:Notify, ou Notify() diretamente
+local env = (getgenv and getgenv()) or _G or {}
+env.SpectrumX = GenesisX
+env.Notify = function(...) return GenesisX:Notify(...) end
 
 return GenesisX
