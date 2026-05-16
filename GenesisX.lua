@@ -2040,6 +2040,8 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
     contentLayout.Padding = UDim.new(0, self:S(6))
     contentLayout.Parent = contentFrame
 
+    -- Guarda referências dos subtitles pra atualização
+    local subtitleLabels = {}
     for i, subText in ipairs(subtitles) do
         local subLabel = Instance.new("TextLabel")
         subLabel.Name = "Subtitle_" .. i
@@ -2052,8 +2054,10 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
         subLabel.TextXAlignment = Enum.TextXAlignment.Left
         subLabel.ZIndex = 14
         subLabel.Parent = contentFrame
+        table.insert(subtitleLabels, subLabel)
     end
 
+    -- Guarda referências dos botões pra atualização
     local buttonObjects = {}
     for i, btnConfig in ipairs(buttons) do
         local btnText = btnConfig.Text or "Button"
@@ -2114,8 +2118,19 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
         rippleHolder.Parent = btn
         self:CreateCorner(rippleHolder, UDim.new(0, 6))
 
+        -- Guarda referências pra poder atualizar depois
+        local btnData = {
+            Button = btn,
+            Frame = btnFrame,
+            Stroke = stroke,
+            CurrentCallback = btnCallback,
+            CurrentStyle = btnStyle,
+            CurrentColor = color,
+            CurrentTextColor = textColor,
+        }
+
         btn.MouseEnter:Connect(function()
-            if btnStyle == "accent" then
+            if btnData.CurrentStyle == "accent" then
                 self:Tween(btn, {BackgroundColor3 = self.Theme.AccentHover}, 0.15)
             else
                 self:Tween(btn, {BackgroundColor3 = self.Theme.InputHover}, 0.15)
@@ -2123,12 +2138,12 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
             end
         end)
         btn.MouseLeave:Connect(function()
-            if btnStyle == "accent" then
+            if btnData.CurrentStyle == "accent" then
                 self:Tween(btn, {BackgroundColor3 = self.Theme.Accent}, 0.15)
             else
-                local bgColor = btnStyle == "danger" and Color3.fromRGB(30, 15, 40)
-                    or btnStyle == "warning" and Color3.fromRGB(30, 20, 10)
-                    or btnStyle == "info" and Color3.fromRGB(20, 15, 30)
+                local bgColor = btnData.CurrentStyle == "danger" and Color3.fromRGB(30, 15, 40)
+                    or btnData.CurrentStyle == "warning" and Color3.fromRGB(30, 20, 10)
+                    or btnData.CurrentStyle == "info" and Color3.fromRGB(20, 15, 30)
                     or self.Theme.Input
                 self:Tween(btn, {BackgroundColor3 = bgColor}, 0.15)
                 if stroke then self:Tween(stroke, {Transparency = 0.4}, 0.15) end
@@ -2136,21 +2151,104 @@ function GenesisX:CreateLabelToggleSubTitle(parent, config)
         end)
         btn.MouseButton1Click:Connect(function()
             self:CreateRipple(btn, UserInputService:GetMouseLocation())
-            btnCallback()
+            btnData.CurrentCallback()
         end)
 
-        table.insert(buttonObjects, {
-            Button = btn,
-            SetText = function(t) btn.Text = t end,
-            SetCallback = function(cb) btnCallback = cb end,
-        })
+        table.insert(buttonObjects, btnData)
     end
 
+    -- ─── MÉTODOS DE ATUALIZAÇÃO ─────────────────────────────────────────────
     return {
         Frame = frame,
         Title = titleLabel,
+        
+        -- Métodos existentes
         SetTitle = function(t) titleLabel.Text = t end,
         SetTitleColor = function(c) titleLabel.TextColor3 = c end,
+        
+        -- NOVOS MÉTODOS DE ATUALIZAÇÃO
+        SetSubtitles = function(newSubtitles)
+            -- Atualiza textos dos subtitles existentes
+            for i, subLabel in ipairs(subtitleLabels) do
+                if newSubtitles[i] then
+                    subLabel.Text = newSubtitles[i]
+                else
+                    subLabel.Text = ""
+                end
+            end
+        end,
+        
+        SetSubtitle = function(index, text)
+            -- Atualiza um subtitle específico
+            if subtitleLabels[index] then
+                subtitleLabels[index].Text = text or ""
+            end
+        end,
+        
+        SetButtonText = function(index, text)
+            -- Atualiza texto de um botão específico
+            local btnData = buttonObjects[index]
+            if btnData then
+                btnData.Button.Text = text or ""
+            end
+        end,
+        
+        SetButtonCallback = function(index, callback)
+            -- Atualiza callback de um botão específico
+            local btnData = buttonObjects[index]
+            if btnData then
+                btnData.CurrentCallback = callback or function() end
+            end
+        end,
+        
+        SetButtonStyle = function(index, style)
+            -- Atualiza estilo visual de um botão
+            local btnData = buttonObjects[index]
+            if not btnData then return end
+            
+            local newColor, newTextColor, newBg
+            if style == "accent" then
+                newBg = self.Theme.Accent
+                newTextColor = Color3.new(1, 1, 1)
+                newColor = self.Theme.Accent
+            elseif style == "danger" then
+                newBg = Color3.fromRGB(30, 15, 40)
+                newTextColor = self.Theme.Error
+                newColor = self.Theme.Error
+            elseif style == "warning" then
+                newBg = Color3.fromRGB(30, 20, 10)
+                newTextColor = self.Theme.Warning
+                newColor = self.Theme.Warning
+            elseif style == "info" then
+                newBg = Color3.fromRGB(20, 15, 30)
+                newTextColor = self.Theme.Info
+                newColor = self.Theme.Info
+            else
+                newBg = self.Theme.Input
+                newTextColor = self.Theme.Text
+                newColor = self.Theme.Border
+            end
+            
+            btnData.CurrentStyle = style
+            btnData.CurrentColor = newColor
+            btnData.CurrentTextColor = newTextColor
+            
+            btnData.Button.BackgroundColor3 = newBg
+            btnData.Button.TextColor3 = newTextColor
+            
+            if btnData.Stroke then
+                btnData.Stroke.Color = newColor
+                btnData.Stroke.Transparency = style == "accent" and 1 or 0.4
+            end
+        end,
+        
+        SetVisible = function(visible)
+            -- Mostra/esconde o card inteiro
+            frame.Visible = visible
+        end,
+        
+        -- Referências diretas (read-only)
+        Subtitles = subtitleLabels,
         Buttons = buttonObjects,
     }
 end
